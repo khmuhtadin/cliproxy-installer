@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # CLIProxy Ultimate Installer for macOS
-# Includes: Homebrew, Go, Git, and CLIProxyAPIPlus
+# Includes: Homebrew, Go, Git, CLIProxyAPIPlus, and Shortcuts
 # ==============================================================================
 
 # --- Colors ---
@@ -27,11 +27,9 @@ install_brew() {
     echo -e "${YELLOW}Installing Homebrew...${NC}"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     
-    # Add Brew to PATH for Apple Silicon (M1/M2/M3)
     if [[ -f "/opt/homebrew/bin/brew" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
-    # Add Brew to PATH for Intel Macs
     if [[ -f "/usr/local/bin/brew" ]]; then
         eval "$(/usr/local/bin/brew shellenv)"
     fi
@@ -56,8 +54,28 @@ install_dependencies() {
     echo -e "${GREEN}[OK] Dependencies ready.${NC}"
 }
 
+setup_shortcuts() {
+    SHELL_CONFIG="$HOME/.zshrc"
+    if [ "$SHELL" == "/bin/bash" ]; then
+        SHELL_CONFIG="$HOME/.bashrc"
+    fi
+
+    echo -e "${YELLOW}Adding shortcuts (cp-login, cp-start) to $SHELL_CONFIG...${NC}"
+    
+    # Remove old aliases if they exist to prevent duplicates
+    sed -i '' '/alias cp-login/d' "$SHELL_CONFIG"
+    sed -i '' '/alias cp-start/d' "$SHELL_CONFIG"
+    
+    # Add new aliases
+    echo "" >> "$SHELL_CONFIG"
+    echo "# CLIProxy Shortcuts" >> "$SHELL_CONFIG"
+    echo "alias cp-login=\"$HOME/.cli-proxy-api/scripts/login.sh\"" >> "$SHELL_CONFIG"
+    echo "alias cp-start=\"$HOME/.cli-proxy-api/scripts/start.sh\"" >> "$SHELL_CONFIG"
+    
+    echo -e "${GREEN}[OK] Shortcuts added!${NC}"
+}
+
 install_cliproxy() {
-    # Check if Go exists before proceeding
     if ! command -v go &> /dev/null; then
         echo -e "${RED}[Error] Go is not found!${NC}"
         echo "Please run option 2 or 4 to install dependencies first."
@@ -76,6 +94,7 @@ install_cliproxy() {
 
     # Clone & Build
     TEMP_DIR=$(mktemp -d)
+    echo "Cloning repository..."
     git clone --depth 1 https://github.com/router-for-me/CLIProxyAPIPlus.git "$TEMP_DIR"
     
     echo "Building binary..."
@@ -96,7 +115,6 @@ quota-exceeded:
 EOF
 
     # Helper Scripts
-    # Start Script
     cat > "$SCRIPTS_DIR/start.sh" <<EOF
 #!/bin/bash
 echo "Starting CLIProxy on http://localhost:8317"
@@ -104,7 +122,6 @@ echo "Starting CLIProxy on http://localhost:8317"
 EOF
     chmod +x "$SCRIPTS_DIR/start.sh"
 
-    # Login Script
     cat > "$SCRIPTS_DIR/login.sh" <<EOF
 #!/bin/bash
 BINARY="$BIN_DIR/cliproxyapi-plus"
@@ -131,11 +148,10 @@ esac
 EOF
     chmod +x "$SCRIPTS_DIR/login.sh"
 
-    # Droid Config
+    # Droid Config Injection
     DROID_FILE="$HOME/.factory/config.json"
     mkdir -p "$(dirname "$DROID_FILE")"
     if [ ! -f "$DROID_FILE" ]; then
-        # Inject JSON (Shortened for brevity, same content as before)
         cat > "$DROID_FILE" <<EOF
 {
     "custom_models": [
@@ -150,15 +166,17 @@ EOF
 }
 EOF
         echo -e "${GREEN}[OK] Droid config created.${NC}"
-    else
-        echo -e "${YELLOW}[!] Droid config exists, skipping.${NC}"
     fi
+
+    # CALL SHORTCUT SETUP
+    setup_shortcuts
 
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}  INSTALLATION SUCCESS!${NC}"
     echo -e "${GREEN}========================================${NC}"
-    echo "1. Login: ~/.cli-proxy-api/scripts/login.sh"
-    echo "2. Start: ~/.cli-proxy-api/scripts/start.sh"
+    echo "Restart your terminal or run 'source ~/.zshrc' to use shortcuts:"
+    echo -e "  1. Login: ${CYAN}cp-login${NC}"
+    echo -e "  2. Start: ${CYAN}cp-start${NC}"
 }
 
 # --- Main Menu ---
@@ -177,31 +195,14 @@ echo ""
 read -p "Please select your choice (1-5): " choice
 
 case $choice in
-    1)
-        install_brew
-        ;;
-    2)
-        install_dependencies
-        ;;
-    3)
-        install_cliproxy
-        ;;
+    1) install_brew ;;
+    2) install_dependencies ;;
+    3) install_cliproxy ;;
     4)
-        echo ""
-        echo -e "${CYAN}Starting Full Installation...${NC}"
-        # Logic: Check brew, if not install. Then deps. Then proxy.
-        if ! check_brew; then
-            install_brew
-        fi
+        if ! check_brew; then install_brew; fi
         install_dependencies
         install_cliproxy
         ;;
-    5)
-        echo "Exiting."
-        exit 0
-        ;;
-    *)
-        echo "Invalid choice."
-        exit 1
-        ;;
+    5) exit 0 ;;
+    *) echo "Invalid choice." ;;
 esac
