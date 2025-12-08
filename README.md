@@ -16,7 +16,7 @@ It handles everything from installing dependencies (Go, Git) to configuring the 
 Open your Terminal and run the following command:
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/khmuhtadin/cliproxy-for-mac/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/khmuhtadin/cliproxy-for-mac/refs/heads/main/install)"
 ```
 
 ## 🛠️ Menu Options
