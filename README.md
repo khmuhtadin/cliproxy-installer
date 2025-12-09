@@ -1,19 +1,19 @@
-# CLIProxy Installer for macOS
+# CLIProxy Installer for macOS & Linux
 
-Automated installer for **CLIProxyAPIPlus** on macOS. This script simplifies the process of setting up custom AI models (Claude, Gemini, etc.) for use in Droid, Cursor, or other AI-powered editors.
+Automated installer for **CLIProxyAPIPlus**. This script simplifies the process of setting up custom AI models (Claude, Gemini, etc.) for use in Droid, Cursor, or other AI-powered editors.
 
 It handles everything from installing dependencies (Go, Git), configuring the local proxy server, to managing updates.
 
 ## 🚀 Features
 
-* **All-in-One Installation**: Automatically checks and installs **Homebrew**, **Git**, and **Go** if they are missing.
+* **All-in-One Installation**: Automatically checks and installs **Homebrew** (macOS) or relevant package managers (Linux), **Git**, and **Go** if they are missing.
 * **Smart Config Merge**: Intelligently adds new models to your `config.json` without overwriting your existing custom configurations.
 * **Auto-Update**: Built-in self-updater keeps both the installer and the core CLIProxy binary up to date with a single command.
 * **Auto-Build**: Clones the latest `CLIProxyAPIPlus` repository and builds the binary for your specific architecture (Intel/Apple Silicon).
 * **Helper Scripts & Shortcuts**: Generates easy-to-use aliases (`cp-login`, `cp-start`, `cp-update`) for your terminal.
 * **Droid Integration**: Automatically injects the necessary model configurations into `~/.factory/config.json` so models appear instantly in Droid.
 
-## 📦 Quick Install
+## 📦 Quick Install for macOS
 
 Open your Terminal and run the following command:
 
@@ -21,11 +21,19 @@ Open your Terminal and run the following command:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/khmuhtadin/cliproxy-for-mac/refs/heads/main/install)"
 ```
 
+## 🐧 Quick Install for Linux
+
+Open your Terminal and run the following command:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/khmuhtadin/cliproxy-for-mac/refs/heads/main/install-linux)"
+```
+
 ## 🛠️ Menu Options
 
 When you run the script, you will see an interactive menu:
 
-1.  **Install Homebrew**: Required package manager.
+1.  **Install Homebrew** (macOS Only) / **Install Dependencies** (Linux Only): Required package manager and dependencies.
 2.  **Install Git & Go**: Required dependencies.
 3.  **Install / Update CLIProxy Core**: Updates the core binary and merges new models into your config.
 4.  **FULL INSTALL (Recommended)**: Runs everything in order (1 -> 2 -> 3).
