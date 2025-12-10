@@ -66,6 +66,7 @@ setup_shortcuts() {
     sed -i '' '/alias cp-login/d' "$SHELL_CONFIG" 2>/dev/null || true
     sed -i '' '/alias cp-start/d' "$SHELL_CONFIG" 2>/dev/null || true
     sed -i '' '/alias cp-update/d' "$SHELL_CONFIG" 2>/dev/null || true
+    sed -i '' '/alias cp-stop/d' "$SHELL_CONFIG" 2>/dev/null || true
 
     # Add new aliases
     echo "" >> "$SHELL_CONFIG"
@@ -73,6 +74,7 @@ setup_shortcuts() {
     echo "alias cp-login=\"$HOME/.cli-proxy-api/scripts/login.sh\"" >> "$SHELL_CONFIG"
     echo "alias cp-start=\"$HOME/.cli-proxy-api/scripts/start.sh\"" >> "$SHELL_CONFIG"
     echo "alias cp-update=\"curl -sL https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/install | bash -s -- -update\"" >> "$SHELL_CONFIG"
+    echo "alias cp-stop=\"$HOME/.cli-proxy-api/scripts/stop.sh\"" >> "$SHELL_CONFIG"
 
     echo -e "${GREEN}[OK] Shortcuts added!${NC}"
 }
@@ -205,6 +207,45 @@ esac
 EOF
     chmod +x "$SCRIPTS_DIR/login.sh"
 
+    # Stop Script
+    cat > "$SCRIPTS_DIR/stop.sh" <<'EOF'
+#!/bin/bash
+# Stop CLIProxy server
+CONFIG_DIR="$HOME/.cli-proxy-api"
+
+echo "Stopping CLIProxy server..."
+
+# Get PID from pid.json
+if [ -f "$CONFIG_DIR/static/pid.json" ]; then
+    PID=$(grep -o '"pid": [0-9]*' "$CONFIG_DIR/static/pid.json" | grep -o '[0-9]*')
+    
+    if [ -n "$PID" ]; then
+        if ps -p $PID > /dev/null 2>&1; then
+            echo "Found server process (PID: $PID)"
+            kill $PID
+            echo "Server stopped successfully"
+        else
+            echo "Server is not running (PID $PID not found)"
+        fi
+    else
+        echo "Could not find PID in static/pid.json"
+    fi
+else
+    echo "PID file not found, trying to find process by name..."
+    
+    # Try to find by process name
+    PID=$(pgrep -f "cliproxyapi-plus")
+    if [ -n "$PID" ]; then
+        echo "Found server process (PID: $PID)"
+        kill $PID
+        echo "Server stopped successfully"
+    else
+        echo "Server is not running"
+    fi
+fi
+EOF
+    chmod +x "$SCRIPTS_DIR/stop.sh"
+
     # Droid Config Injection
     DROID_FILE="$HOME/.factory/config.json"
     mkdir -p "$(dirname "$DROID_FILE")"
@@ -263,7 +304,8 @@ EOF
     echo "Restart your terminal or run 'source ~/.zshrc' to use shortcuts:"
     echo -e "  1. Login:  ${CYAN}cp-login${NC}"
     echo -e "  2. Start:  ${CYAN}cp-start${NC}"
-    echo -e "  3. Update: ${CYAN}cp-update${NC} (Fetches latest core & installer)"
+    echo -e "  3. Stop:   ${CYAN}cp-stop${NC}"
+    echo -e "  4. Update: ${CYAN}cp-update${NC} (Fetches latest core & installer)"
 }
 
 # --- Main Execution ---

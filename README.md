@@ -101,7 +101,15 @@ Start the local server. Keep this terminal window open while using Droid/Cursor:
 cp-start
 ```
 
-### 3. Update Everything
+### 3. Stop the Proxy
+
+To stop the running proxy server:
+
+```bash
+cp-stop
+```
+
+### 4. Update Everything
 
 To update the installer script, the core binary, and add new models to your config:
 
@@ -109,7 +117,7 @@ To update the installer script, the core binary, and add new models to your conf
 cp-update
 ```
 
-### 4. Usage in Droid/Cursor
+### 5. Usage in Droid/Cursor
 
 1.  Open Droid.
 2.  Go to Model selection.
@@ -120,7 +128,9 @@ cp-update
 
 * `cp-login` : Open the login menu.
 * `cp-start` : Start the proxy server.
+* `cp-stop`  : Stop the proxy server.
 * `cp-update`: Auto-update the installer and core binary.
+* `cp-db`    : Open the monitoring dashboard.
 
 ## 📂 File Locations
 
