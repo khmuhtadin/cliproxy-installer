@@ -72,14 +72,19 @@ function cp-update {
     # Read current profile
     $currentProfileContent = Get-Content $PowerShellProfile -Raw -ErrorAction SilentlyContinue
     
-    # Remove old blocks if they exist to prevent duplicates (Simple check)
-    if ($currentProfileContent -match "# --- CLIProxy Shortcuts ---") {
-        Write-Host "Shortcuts already exist in profile. Updating..."
-        # In a real scenario, robust regex replacement is better, but appending works if we assume user manages their profile.
-        # For safety, we will just notify.
-    } else {
+    # Remove old CLIProxy shortcuts block if exists
+    if ($currentProfileContent -match "(?s)# --- CLIProxy Shortcuts ---.*?(?=\r?\n# ---|$)") {
+        Write-Host "Removing old shortcuts..."
+        $currentProfileContent = $currentProfileContent -replace "(?s)# --- CLIProxy Shortcuts ---.*?function cp-update \{[^}]+\}", ""
+        Set-Content -Path $PowerShellProfile -Value $currentProfileContent.Trim()
+    }
+    
+    # Add new shortcuts
+    if (-not ($currentProfileContent -match "# --- CLIProxy Shortcuts ---")) {
         Add-Content -Path $PowerShellProfile -Value $shortcutBlock
         Write-Green "[OK] Shortcuts added to $PowerShellProfile"
+    } else {
+        Write-Yellow "[!] Shortcuts already exist. Skipped."
     }
 }
 
@@ -101,15 +106,36 @@ function Install-CLIProxy {
     New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
     
     Write-Host "Cloning repository..."
-    git clone --depth 1 $RepoUrl $TempDir
+    try {
+        git clone --depth 1 $RepoUrl $TempDir
+        if ($LASTEXITCODE -ne 0) {
+            throw "Git clone failed"
+        }
+    } catch {
+        Write-Red "[Error] Failed to clone repository: $_"
+        Remove-Item -Recurse -Force $TempDir -ErrorAction SilentlyContinue
+        exit 1
+    }
     
     Write-Host "Building binary..."
     Push-Location $TempDir
-    go build -o cliproxyapi-plus.exe ./cmd/server
+    try {
+        go build -o cliproxyapi-plus.exe ./cmd/server
+        if ($LASTEXITCODE -ne 0) {
+            throw "Go build failed"
+        }
+    } catch {
+        Write-Red "[Error] Failed to build binary: $_"
+        Pop-Location
+        Remove-Item -Recurse -Force $TempDir -ErrorAction SilentlyContinue
+        exit 1
+    }
     
     Move-Item -Force -Path "cliproxyapi-plus.exe" -Destination "$BinDir\cliproxyapi-plus.exe"
     Pop-Location
     Remove-Item -Recurse -Force $TempDir
+    
+    Write-Green "[OK] Binary built and installed successfully."
 
     # Config.yaml
     if (-not (Test-Path "$ConfigDir\config.yaml")) {
@@ -191,8 +217,8 @@ switch (`$choice) {
         @{ model_display_name = "GLM 4.6 [iFlow]"; model = "glm-4.6"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy"; provider = "openai" },
         @{ model_display_name = "Claude Opus 4.5 [Kiro]"; model = "kiro-claude-opus-4.5"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy"; provider = "openai" },
         @{ model_display_name = "Claude Sonnet 4.5 [Kiro]"; model = "kiro-claude-sonnet-4.5"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy"; provider = "openai" },
-        @{ model_display_name = "Claude Sonnet 4 [Kiro]"; model = "kiro-claude-sonnet-4"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy", "provider": "openai" },
-        @{ model_display_name = "Claude Haiku 4.5 [Kiro]"; model = "kiro-claude-haiku-4.5"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy", "provider": "openai" }
+        @{ model_display_name = "Claude Sonnet 4 [Kiro]"; model = "kiro-claude-sonnet-4"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy"; provider = "openai" },
+        @{ model_display_name = "Claude Haiku 4.5 [Kiro]"; model = "kiro-claude-haiku-4.5"; base_url = "http://localhost:8317/v1"; api_key = "sk-dummy"; provider = "openai" }
     )
 
     if (Test-Path $DroidConfigFile) {

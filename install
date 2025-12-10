@@ -63,9 +63,9 @@ setup_shortcuts() {
     echo -e "${YELLOW}Adding shortcuts (cp-login, cp-start) to $SHELL_CONFIG...${NC}"
     
     # Remove old aliases if they exist to prevent duplicates
-    sed -i '' '/alias cp-login/d' "$SHELL_CONFIG"
-    sed -i '' '/alias cp-start/d' "$SHELL_CONFIG"
-    sed -i '' '/alias cp-update/d' "$SHELL_CONFIG"
+    sed -i '' '/alias cp-login/d' "$SHELL_CONFIG" 2>/dev/null || true
+    sed -i '' '/alias cp-start/d' "$SHELL_CONFIG" 2>/dev/null || true
+    sed -i '' '/alias cp-update/d' "$SHELL_CONFIG" 2>/dev/null || true
     
     # Add new aliases
     echo "" >> "$SHELL_CONFIG"
@@ -97,16 +97,29 @@ install_cliproxy() {
     # Clone & Build
     TEMP_DIR=$(mktemp -d)
     echo "Cloning repository..."
-    git clone --depth 1 https://github.com/router-for-me/CLIProxyAPIPlus.git "$TEMP_DIR"
+    if ! git clone --depth 1 https://github.com/router-for-me/CLIProxyAPIPlus.git "$TEMP_DIR"; then
+        echo -e "${RED}[Error] Failed to clone repository${NC}"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
     
     echo "Building binary..."
     cd "$TEMP_DIR"
-    go build -o cliproxyapi-plus ./cmd/server
+    if ! go build -o cliproxyapi-plus ./cmd/server; then
+        echo -e "${RED}[Error] Failed to build binary${NC}"
+        cd -
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
     mv -f cliproxyapi-plus "$BIN_DIR/cliproxyapi-plus"
+    cd -
     rm -rf "$TEMP_DIR"
+    
+    echo -e "${GREEN}[OK] Binary built and installed successfully.${NC}"
 
-    # Config
-    cat > "$CONFIG_DIR/config.yaml" <<EOF
+    # Config - Only create if it doesn't exist to preserve user settings
+    if [ ! -f "$CONFIG_DIR/config.yaml" ]; then
+        cat > "$CONFIG_DIR/config.yaml" <<EOF
 port: 8317
 auth-dir: "$CONFIG_DIR"
 api-keys:
@@ -115,6 +128,10 @@ quota-exceeded:
   switch-project: true
   switch-preview-model: true
 EOF
+        echo -e "${GREEN}[OK] Created config.yaml${NC}"
+    else
+        echo -e "${YELLOW}[!] config.yaml exists, preserving user settings${NC}"
+    fi
 
     # Helper Scripts
     cat > "$SCRIPTS_DIR/start.sh" <<EOF
@@ -190,90 +207,14 @@ EOF
     else
         echo -e "${YELLOW}[!] config.json exists, checking for missing models...${NC}"
         
-        # Create temp Go merger
-        cat > "/tmp/merge_config.go" <<'GOEOF'
-package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"os"
-)
-
-type Model struct {
-	ModelDisplayName string `json:"model_display_name"`
-	Model            string `json:"model"`
-	BaseURL          string `json:"base_url"`
-	APIKey           string `json:"api_key"`
-	Provider         string `json:"provider"`
-}
-
-type Config struct {
-	CustomModels []Model `json:"custom_models"`
-}
-
-func main() {
-	if len(os.Args) < 3 {
-		os.Exit(1)
-	}
-	existingPath := os.Args[1]
-	newPath := os.Args[2]
-
-	existingBytes, err := os.ReadFile(existingPath)
-	if err != nil {
-		fmt.Printf("Error reading existing: %v\n", err)
-		os.Exit(1)
-	}
-	var existingConfig Config
-	if err := json.Unmarshal(existingBytes, &existingConfig); err != nil {
-		fmt.Printf("Error parsing existing: %v\n", err)
-		os.Exit(1)
-	}
-
-	newBytes, err := os.ReadFile(newPath)
-	if err != nil {
-		fmt.Printf("Error reading new: %v\n", err)
-		os.Exit(1)
-	}
-	var newConfig Config
-	if err := json.Unmarshal(newBytes, &newConfig); err != nil {
-		fmt.Printf("Error parsing new: %v\n", err)
-		os.Exit(1)
-	}
-
-	existingMap := make(map[string]bool)
-	for _, m := range existingConfig.CustomModels {
-		existingMap[m.Model] = true
-	}
-
-	addedCount := 0
-	for _, m := range newConfig.CustomModels {
-		if !existingMap[m.Model] {
-			existingConfig.CustomModels = append(existingConfig.CustomModels, m)
-			existingMap[m.Model] = true
-			addedCount++
-		}
-	}
-
-	if addedCount > 0 {
-		outBytes, err := json.MarshalIndent(existingConfig, "", "    ")
-		if err != nil {
-			fmt.Printf("Error marshaling: %v\n", err)
-			os.Exit(1)
-		}
-		if err := os.WriteFile(existingPath, outBytes, 0644); err != nil {
-			fmt.Printf("Error writing: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Printf("Merged %d new models into config\n", addedCount)
-	} else {
-		fmt.Println("No new models to add")
-	}
-}
-GOEOF
-        # Run merger
-        go run "/tmp/merge_config.go" "$DROID_FILE" "/tmp/cliproxy_new_models.json"
-        rm -f "/tmp/merge_config.go"
+        # Download and use shared merge utility
+        MERGE_UTIL="/tmp/merge_config_$$.go"
+        if curl -fsSL "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/merge-config.go" -o "$MERGE_UTIL"; then
+            go run "$MERGE_UTIL" "$DROID_FILE" "/tmp/cliproxy_new_models.json"
+            rm -f "$MERGE_UTIL"
+        else
+            echo -e "${RED}[Error] Failed to download config merger. Skipping model merge.${NC}"
+        fi
     fi
     rm -f "/tmp/cliproxy_new_models.json"
 
@@ -293,9 +234,13 @@ GOEOF
 # --- Main Execution ---
 
 if [[ "$1" == "-update" ]]; then
+    echo -e "${CYAN}========================================${NC}"
+    echo -e "${CYAN}   Updating CLIProxy...${NC}"
+    echo -e "${CYAN}========================================${NC}"
     if ! check_brew; then install_brew; fi
     install_dependencies
     install_cliproxy
+    echo -e "${GREEN}Update complete!${NC}"
     exit 0
 fi
 
