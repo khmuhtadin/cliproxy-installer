@@ -146,7 +146,8 @@ Write-Host "4. Codex"
 Write-Host "5. Claude"
 Write-Host "6. Qwen"
 Write-Host "7. iFlow"
-`$choice = Read-Host "Select provider (1-7)"
+Write-Host "8. Kiro"
+`$choice = Read-Host "Select provider (1-8)"
 
 switch (`$choice) {
     '1' { & `$Binary --config `$Config -antigravity-login }
@@ -156,6 +157,7 @@ switch (`$choice) {
     '5' { & `$Binary --config `$Config -claude-login }
     '6' { & `$Binary --config `$Config -qwen-login }
     '7' { & `$Binary --config `$Config -iflow-login }
+    '8' { & `$Binary --config `$Config -kiro-login }
     Default { Write-Host "Invalid choice" }
 }
 "@

@@ -136,7 +136,8 @@ echo "4. Codex"
 echo "5. Claude"
 echo "6. Qwen"
 echo "7. iFlow"
-read -p "Select provider (1-7): " c
+echo "8. Kiro"
+read -p "Select provider (1-8): " c
 case \$c in
   1) "\$BINARY" --config "\$CONFIG" -antigravity-login ;;
   2) "\$BINARY" --config "\$CONFIG" -github-copilot-login ;;
@@ -145,6 +146,7 @@ case \$c in
   5) "\$BINARY" --config "\$CONFIG" -claude-login ;;
   6) "\$BINARY" --config "\$CONFIG" -qwen-login ;;
   7) "\$BINARY" --config "\$CONFIG" -iflow-login ;;
+  8) "\$BINARY" --config "\$CONFIG" -kiro-login ;;
   *) echo "Invalid" ;;
 esac
 EOF
