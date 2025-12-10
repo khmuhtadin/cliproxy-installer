@@ -170,7 +170,14 @@ EOF
         { "model_display_name": "Gemini 3 Ultra [Antigravity]", "model": "gemini-3-ultra-preview", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
         { "model_display_name": "Llama 4 405B [Meta]", "model": "llama-4-405b-instruct", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
         { "model_display_name": "DeepSeek V3.2 [Antigravity]", "model": "deepseek-v3.2-chat", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
-        { "model_display_name": "Nano Banana [Local]", "model": "nano-banana-v1", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" }
+        { "model_display_name": "Nano Banana [Local]", "model": "nano-banana-v1", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "Gemini 2.5 Pro [Gemini]", "model": "gemini-2.5-pro", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "Qwen3 Coder Plus [Qwen]", "model": "qwen3-coder-plus", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "GLM 4.6 [iFlow]", "model": "glm-4.6", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "Claude Opus 4.5 [Kiro]", "model": "kiro-claude-opus-4.5", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "Claude Sonnet 4.5 [Kiro]", "model": "kiro-claude-sonnet-4.5", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "Claude Sonnet 4 [Kiro]", "model": "kiro-claude-sonnet-4", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" },
+        { "model_display_name": "Claude Haiku 4.5 [Kiro]", "model": "kiro-claude-haiku-4.5", "base_url": "http://localhost:8317/v1", "api_key": "sk-dummy", "provider": "openai" }
     ]
 }
 EOF
