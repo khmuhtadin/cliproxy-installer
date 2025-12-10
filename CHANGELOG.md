@@ -83,3 +83,34 @@ All three installers now:
 4. `merge-config.go` (NEW) - Shared utility
 
 **Total**: 193 lines removed (duplicates), 122 lines improved
+
+## [Unreleased] - 2025-12-10
+
+### Added
+- **Enhanced Dashboard**: Modern, premium dashboard with glassmorphism design
+  - Real-time server monitoring
+  - Provider and model management UI
+  - Activity logging with color-coded events
+  - Smart server control buttons with fallback instructions
+  - Auto-refresh every 10 seconds
+  - Modern typography with Google Fonts (Inter)
+  - Animated backgrounds and hover effects
+  - Responsive layout for mobile and desktop
+
+- **cp-db Command**: Smart dashboard launcher
+  - Auto-checks if server is running
+  - Auto-starts server if needed
+  - Opens dashboard in default browser
+  - Cross-platform support (macOS/Linux)
+  
+### Changed
+- Installer now includes assets directory for bundled files
+- Dashboard installation integrated into main install script
+- Success message updated to show cp-db command
+
+### Technical Details
+- Dashboard uses modern CSS with glassmorphism effects
+- JavaScript handles real-time data fetching from management API
+- Fallback strategies for PID display
+- Smart error handling with helpful user instructions
+

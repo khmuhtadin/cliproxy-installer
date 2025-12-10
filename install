@@ -93,6 +93,42 @@ install_cliproxy() {
     mkdir -p "$BIN_DIR"
     mkdir -p "$CONFIG_DIR"
     mkdir -p "$SCRIPTS_DIR"
+    STATIC_DIR="$CONFIG_DIR/static"
+    mkdir -p "$STATIC_DIR"
+
+    # Copy enhanced dashboard
+    echo "📊 Installing enhanced dashboard..."
+    DASHBOARD_SRC="$(dirname "$0")/assets/static/dashboard.html"
+    if [ -f "$DASHBOARD_SRC" ]; then
+        cp "$DASHBOARD_SRC" "$STATIC_DIR/dashboard.html"
+        echo -e "${GREEN}[OK] Dashboard installed from local assets${NC}"
+    else
+        # Fallback: try to download from GitHub
+        if curl -fsSL "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/static/dashboard.html" -o "$STATIC_DIR/dashboard.html" 2>/dev/null; then
+            echo -e "${GREEN}[OK] Dashboard downloaded from GitHub${NC}"
+        else
+            echo -e "${YELLOW}[!] Could not install dashboard${NC}"
+        fi
+    fi
+
+    # Install cp-db command
+    echo "🔮 Installing cp-db shortcut..."
+    CPDB_SRC="$(dirname "$0")/assets/scripts/cp-db.sh"
+    if [ -f "$CPDB_SRC" ]; then
+        sudo cp "$CPDB_SRC" /usr/local/bin/cp-db
+        sudo chmod +x /usr/local/bin/cp-db
+        echo -e "${GREEN}[OK] cp-db installed from local assets${NC}"
+    else
+        # Fallback: try to download from GitHub
+        if curl -fsSL "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/scripts/cp-db.sh" -o "/tmp/cp-db" 2>/dev/null; then
+            sudo mv /tmp/cp-db /usr/local/bin/cp-db
+            sudo chmod +x /usr/local/bin/cp-db
+            echo -e "${GREEN}[OK] cp-db downloaded from GitHub${NC}"
+        else
+            echo -e "${YELLOW}[!] Could not install cp-db command${NC}"
+        fi
+    fi
+
 
     # Clone & Build
     TEMP_DIR=$(mktemp -d)

@@ -98,6 +98,44 @@ function Install-CLIProxy {
     New-Item -ItemType Directory -Force -Path $ConfigDir | Out-Null
     New-Item -ItemType Directory -Force -Path $ScriptsDir | Out-Null
 
+    # Create static directory for dashboard
+    $StaticDir = "$ConfigDir\static"
+    New-Item -ItemType Directory -Force -Path $StaticDir | Out-Null
+
+    # Install enhanced dashboard
+    Write-Host "📊 Installing enhanced dashboard..."
+    $DashboardSrc = Join-Path (Split-Path $PSCommandPath) "assets\static\dashboard.html"
+    if (Test-Path $DashboardSrc) {
+        Copy-Item $DashboardSrc "$StaticDir\dashboard.html" -Force
+        Write-Green "[OK] Dashboard installed from local assets"
+    } else {
+        # Fallback: download from GitHub
+        try {
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/static/dashboard.html" -OutFile "$StaticDir\dashboard.html" -ErrorAction Stop
+            Write-Green "[OK] Dashboard downloaded from GitHub"
+        } catch {
+            Write-Yellow "[!] Could not install dashboard"
+        }
+    }
+
+    # Install cp-db command (PowerShell function)
+    Write-Host "🔮 Installing cp-db shortcut..."
+    $CpDbSrc = Join-Path (Split-Path $PSCommandPath) "assets\scripts\cp-db.ps1"
+    $CpDbDest = "$ScriptsDir\cp-db.ps1"
+    if (Test-Path $CpDbSrc) {
+        Copy-Item $CpDbSrc $CpDbDest -Force
+        Write-Green "[OK] cp-db installed from local assets"
+    } else {
+        # Fallback: download from GitHub
+        try {
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/scripts/cp-db.ps1" -OutFile $CpDbDest -ErrorAction Stop
+            Write-Green "[OK] cp-db downloaded from GitHub"
+        } catch {
+            Write-Yellow "[!] Could not install cp-db command"
+        }
+    }
+
+
     # Add Bin to Path if needed (Temporary for this session, User needs to set env var persistently if not set)
     $env:Path += ";$BinDir"
 
