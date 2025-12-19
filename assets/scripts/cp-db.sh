@@ -16,9 +16,16 @@ if lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
 else
     echo "⚠️  Server not running, starting now..."
     
-    # Check if cp-start command exists
+    # Determine start command
+    CP_START_CMD=""
     if command -v cp-start >/dev/null 2>&1; then
-        cp-start &
+        CP_START_CMD="cp-start"
+    elif [ -x "$HOME/.cli-proxy-api/scripts/start.sh" ]; then
+        CP_START_CMD="$HOME/.cli-proxy-api/scripts/start.sh"
+    fi
+
+    if [ -n "$CP_START_CMD" ]; then
+        "$CP_START_CMD" &
         echo "⏳ Waiting for server to start..."
         
         # Wait up to 10 seconds for server to start

@@ -115,21 +115,82 @@ install_cliproxy() {
 
     # Install cp-db command
     echo "🔮 Installing cp-db shortcut..."
-    CPDB_SRC="$(dirname "$0")/assets/scripts/cp-db.sh"
-    if [ -f "$CPDB_SRC" ]; then
-        sudo cp "$CPDB_SRC" /usr/local/bin/cp-db
-        sudo chmod +x /usr/local/bin/cp-db
-        echo -e "${GREEN}[OK] cp-db installed from local assets${NC}"
-    else
-        # Fallback: try to download from GitHub
-        if curl -fsSL "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/scripts/cp-db.sh" -o "/tmp/cp-db" 2>/dev/null; then
-            sudo mv /tmp/cp-db /usr/local/bin/cp-db
-            sudo chmod +x /usr/local/bin/cp-db
-            echo -e "${GREEN}[OK] cp-db downloaded from GitHub${NC}"
-        else
-            echo -e "${YELLOW}[!] Could not install cp-db command${NC}"
-        fi
+    cat > "/tmp/cp-db" <<'EOF'
+#!/bin/bash
+
+# CLIProxy Dashboard Launcher
+# Checks if server is running, starts if needed, then opens dashboard
+
+DASHBOARD_URL="http://localhost:8317/dashboard.html"
+PORT=8317
+
+echo "🔮 CLIProxy Dashboard Launcher"
+echo ""
+
+# Check if server is already running
+if lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
+    PID=$(lsof -i :$PORT -sTCP:LISTEN -t)
+    echo "✅ Server already running (PID: $PID)"
+else
+    echo "⚠️  Server not running, starting now..."
+    
+    # Determine start command
+    CP_START_CMD=""
+    if command -v cp-start >/dev/null 2>&1; then
+        CP_START_CMD="cp-start"
+    elif [ -x "$HOME/.cli-proxy-api/scripts/start.sh" ]; then
+        CP_START_CMD="$HOME/.cli-proxy-api/scripts/start.sh"
     fi
+
+    if [ -n "$CP_START_CMD" ]; then
+        "$CP_START_CMD" &
+        echo "⏳ Waiting for server to start..."
+        
+        # Wait up to 10 seconds for server to start
+        for i in {1..10}; do
+            sleep 1
+            if lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
+                PID=$(lsof -i :$PORT -sTCP:LISTEN -t)
+                echo "✅ Server started successfully (PID: $PID)"
+                break
+            fi
+            if [ $i -eq 10 ]; then
+                echo "❌ Server failed to start. Please check logs."
+                exit 1
+            fi
+        done
+    else
+        echo "❌ cp-start command not found. Please install CLIProxy first."
+        exit 1
+    fi
+fi
+
+echo ""
+echo "🌐 Opening dashboard: $DASHBOARD_URL"
+echo ""
+
+# Open dashboard in default browser
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    open "$DASHBOARD_URL"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux
+    if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$DASHBOARD_URL"
+    elif command -v gnome-open >/dev/null 2>&1; then
+        gnome-open "$DASHBOARD_URL"
+    else
+        echo "Please open manually: $DASHBOARD_URL"
+    fi
+else
+    echo "Please open manually: $DASHBOARD_URL"
+fi
+
+echo "✨ Dashboard opened successfully!"
+EOF
+    sudo mv /tmp/cp-db /usr/local/bin/cp-db
+    sudo chmod +x /usr/local/bin/cp-db
+    echo -e "${GREEN}[OK] cp-db installed${NC}"
 
 
     # Clone & Build
@@ -206,42 +267,29 @@ case \$c in
 esac
 EOF
     chmod +x "$SCRIPTS_DIR/login.sh"
-
     # Stop Script
     cat > "$SCRIPTS_DIR/stop.sh" <<'EOF'
 #!/bin/bash
 # Stop CLIProxy server
-CONFIG_DIR="$HOME/.cli-proxy-api"
+PORT=8317
 
-echo "Stopping CLIProxy server..."
+echo "Stopping CLIProxy server on port $PORT..."
 
-# Get PID from pid.json
-if [ -f "$CONFIG_DIR/static/pid.json" ]; then
-    PID=$(grep -o '"pid": [0-9]*' "$CONFIG_DIR/static/pid.json" | grep -o '[0-9]*')
+# Find PID listening on port
+if lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
+    PID=$(lsof -i :$PORT -sTCP:LISTEN -t)
+    echo "Found server process (PID: $PID)"
+    kill $PID
     
-    if [ -n "$PID" ]; then
-        if ps -p $PID > /dev/null 2>&1; then
-            echo "Found server process (PID: $PID)"
-            kill $PID
-            echo "Server stopped successfully"
-        else
-            echo "Server is not running (PID $PID not found)"
-        fi
-    else
-        echo "Could not find PID in static/pid.json"
+    # Wait for process to stop
+    sleep 1
+    if lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
+         echo "Force killing..."
+         kill -9 $PID
     fi
+    echo "Server stopped successfully"
 else
-    echo "PID file not found, trying to find process by name..."
-    
-    # Try to find by process name
-    PID=$(pgrep -f "cliproxyapi-plus")
-    if [ -n "$PID" ]; then
-        echo "Found server process (PID: $PID)"
-        kill $PID
-        echo "Server stopped successfully"
-    else
-        echo "Server is not running"
-    fi
+    echo "Server is not running on port $PORT"
 fi
 EOF
     chmod +x "$SCRIPTS_DIR/stop.sh"
