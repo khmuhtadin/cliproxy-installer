@@ -66,7 +66,12 @@ setup_shortcuts() {
     sed -i '' '/alias cp-login/d' "$SHELL_CONFIG" 2>/dev/null || true
     sed -i '' '/alias cp-start/d' "$SHELL_CONFIG" 2>/dev/null || true
     sed -i '' '/alias cp-update/d' "$SHELL_CONFIG" 2>/dev/null || true
+    # Remove old aliases if they exist to prevent duplicates
+    sed -i '' '/alias cp-login/d' "$SHELL_CONFIG" 2>/dev/null || true
+    sed -i '' '/alias cp-start/d' "$SHELL_CONFIG" 2>/dev/null || true
+    sed -i '' '/alias cp-update/d' "$SHELL_CONFIG" 2>/dev/null || true
     sed -i '' '/alias cp-stop/d' "$SHELL_CONFIG" 2>/dev/null || true
+    sed -i '' '/alias cp-claude/d' "$SHELL_CONFIG" 2>/dev/null || true
 
     # Add new aliases
     echo "" >> "$SHELL_CONFIG"
@@ -75,6 +80,7 @@ setup_shortcuts() {
     echo "alias cp-start=\"$HOME/.cli-proxy-api/scripts/start.sh\"" >> "$SHELL_CONFIG"
     echo "alias cp-update=\"curl -sL https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/install | bash -s -- -update\"" >> "$SHELL_CONFIG"
     echo "alias cp-stop=\"$HOME/.cli-proxy-api/scripts/stop.sh\"" >> "$SHELL_CONFIG"
+    echo "alias cp-claude=\"ANTHROPIC_BASE_URL='http://localhost:8317' ANTHROPIC_API_KEY='sk-dummy' claude\"" >> "$SHELL_CONFIG"
 
     echo -e "${GREEN}[OK] Shortcuts added!${NC}"
 }
@@ -357,6 +363,7 @@ EOF
     echo -e "  2. Start:  ${CYAN}cp-start${NC}"
     echo -e "  3. Stop:   ${CYAN}cp-stop${NC}"
     echo -e "  4. Update: ${CYAN}cp-update${NC} (Fetches latest core & installer)"
+    echo -e "  5. Claude: ${CYAN}cp-claude${NC} (Runs Claude Code with Proxy)"
 }
 
 # --- Main Execution ---
