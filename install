@@ -309,6 +309,7 @@ EOF
 # Configuration
 PROXY_URL="http://localhost:8317"
 API_KEY="sk-dummy"
+PORT=8317
 
 # Export environment variables for Claude Code
 export ANTHROPIC_BASE_URL="$PROXY_URL"
@@ -319,16 +320,57 @@ if [ "$#" -gt 0 ]; then
     exec claude "$@"
 fi
 
+# Function to check if server is running
+check_server() {
+    lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1
+    return $?
+}
+
+# Auto-start logic
+if ! check_server; then
+    echo "⚠️  Server not running on port $PORT. Auto-starting..."
+    
+    # Determine start command
+    CP_START_CMD=""
+    if command -v cp-start >/dev/null 2>&1; then
+        CP_START_CMD="cp-start"
+    elif [ -x "$HOME/.cli-proxy-api/scripts/start.sh" ]; then
+        CP_START_CMD="$HOME/.cli-proxy-api/scripts/start.sh"
+    fi
+
+    if [ -n "$CP_START_CMD" ]; then
+        "$CP_START_CMD" >/dev/null 2>&1 &
+        echo "⏳ Waiting for server..."
+        
+        # Wait up to 10 seconds
+        for i in {1..10}; do
+            sleep 1
+            if check_server; then
+                echo "✅ Server started."
+                break
+            fi
+            if [ $i -eq 10 ]; then
+                echo "❌ Failed to auto-start server."
+                exit 1
+            fi
+        done
+        # Give it a small extra buffer for API readiness
+        sleep 1
+    else
+        echo "❌ cp-start command not found. Cannot auto-start."
+        exit 1
+    fi
+fi
+
 # Interactive Mode: Fetch and select models
 echo "🔍 Fetching available models..."
 
 # Fetch models using curl
 RESPONSE=$(curl -s -H "Authorization: Bearer $API_KEY" "$PROXY_URL/v1/models")
 
-# Check if curl failed
+# Check if curl failed (even after auto-start attempt)
 if [ $? -ne 0 ]; then
     echo "❌ Failed to connect to proxy at $PROXY_URL"
-    echo "Is the server running? Try 'cp-start'"
     exit 1
 fi
 
@@ -356,8 +398,16 @@ fi
 MODEL_ARRAY=($MODELS)
 
 if [ ${#MODEL_ARRAY[@]} -eq 0 ]; then
-    echo "❌ No models found."
-    exit 1
+    # Fallback/Retry once if empty (sometimes happens on fresh start)
+    sleep 1
+    RESPONSE=$(curl -s -H "Authorization: Bearer $API_KEY" "$PROXY_URL/v1/models")
+    MODELS=$(echo "$RESPONSE" | python3 -c "import sys, json; print(' '.join([m['id'] for m in json.load(sys.stdin)['data']]))" 2>/dev/null)
+    MODEL_ARRAY=($MODELS)
+    
+    if [ ${#MODEL_ARRAY[@]} -eq 0 ]; then
+         echo "❌ No models found."
+         exit 1
+    fi
 fi
 
 echo "🤖 Available Models:"
