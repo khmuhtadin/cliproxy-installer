@@ -149,6 +149,110 @@ setup_shortcuts() {
     echo -e "${GREEN}[OK] Shortcuts added.${NC}"
 }
 
+install_claude_statusline() {
+    echo -e "${YELLOW}>>> Installing Claude Statusline...${NC}"
+    
+    PLATFORM=$(detect_os)
+    STATUSLINE_DIR="$HOME/Scripts/claude-statusline"
+    CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+    
+    # Check for jq dependency
+    if ! command -v jq &> /dev/null; then
+        echo -e "${YELLOW}[!] jq is required for Claude Statusline${NC}"
+        
+        if [ "$PLATFORM" == "macos" ]; then
+            echo "Installing jq via Homebrew..."
+            brew install jq
+        elif [ "$PLATFORM" == "linux" ]; then
+            echo "Installing jq..."
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get install -y jq
+            elif command -v dnf &> /dev/null; then
+                sudo dnf install -y jq
+            elif command -v pacman &> /dev/null; then
+                sudo pacman -S --noconfirm jq
+            elif command -v yum &> /dev/null; then
+                sudo yum install -y jq
+            else
+                echo -e "${RED}[Error] Could not install jq. Please install it manually.${NC}"
+                return 1
+            fi
+        elif [ "$PLATFORM" == "windows" ]; then
+            echo -e "${YELLOW}Please install jq manually:${NC}"
+            echo "  - Using Chocolatey: choco install jq"
+            echo "  - Using Scoop: scoop install jq"
+            echo "  - Or download from: https://jqlang.github.io/jq/download/"
+            return 1
+        fi
+    fi
+    
+    # Create directory
+    mkdir -p "$STATUSLINE_DIR"
+    
+    # Download statusline files from GitHub
+    echo "Downloading statusline script..."
+    if curl -fsSL "https://raw.githubusercontent.com/galpratama/claude-statusline/main/statusline-command.sh" -o "$STATUSLINE_DIR/statusline-command.sh"; then
+        chmod +x "$STATUSLINE_DIR/statusline-command.sh"
+        echo -e "${GREEN}[OK] statusline-command.sh downloaded${NC}"
+    else
+        echo -e "${RED}[Error] Failed to download statusline-command.sh${NC}"
+        return 1
+    fi
+    
+    echo "Downloading statusline config..."
+    if curl -fsSL "https://raw.githubusercontent.com/galpratama/claude-statusline/main/statusline-config.json" -o "$STATUSLINE_DIR/statusline-config.json"; then
+        echo -e "${GREEN}[OK] statusline-config.json downloaded${NC}"
+    else
+        echo -e "${RED}[Error] Failed to download statusline-config.json${NC}"
+        return 1
+    fi
+    
+    # Set permissions
+    chmod +x "$STATUSLINE_DIR/statusline-command.sh"
+    
+    # Configure Claude Code settings
+    mkdir -p "$HOME/.claude"
+    
+    if [ -f "$CLAUDE_SETTINGS" ]; then
+        # Backup existing settings
+        cp "$CLAUDE_SETTINGS" "$CLAUDE_SETTINGS.backup"
+        echo -e "${YELLOW}[!] Backed up existing settings.json${NC}"
+        
+        # Merge statusLine config
+        if jq '. + {"statusLine": {"command": "/bin/bash $HOME/Scripts/claude-statusline/statusline-command.sh", "type": "command"}}' \
+            "$CLAUDE_SETTINGS" > "$CLAUDE_SETTINGS.tmp" 2>/dev/null; then
+            mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
+            echo -e "${GREEN}[OK] Updated settings.json with statusLine config${NC}"
+        else
+            echo -e "${RED}[Error] Failed to update settings.json${NC}"
+            rm -f "$CLAUDE_SETTINGS.tmp"
+            return 1
+        fi
+    else
+        # Create new settings file
+        cat > "$CLAUDE_SETTINGS" <<'EOF'
+{
+  "statusLine": {
+    "command": "/bin/bash $HOME/Scripts/claude-statusline/statusline-command.sh",
+    "type": "command"
+  }
+}
+EOF
+        echo -e "${GREEN}[OK] Created settings.json with statusLine config${NC}"
+    fi
+    
+    # Test the statusline
+    echo "Testing statusline..."
+    if bash "$STATUSLINE_DIR/statusline-command.sh" < /dev/null 2>/dev/null; then
+        echo -e "${GREEN}[OK] Statusline script works!${NC}"
+    else
+        echo -e "${YELLOW}[!] Statusline test had issues (may need jq)${NC}"
+    fi
+    
+    echo -e "${GREEN}[OK] Claude Statusline installed!${NC}"
+    echo "    Restart Claude Code to see the statusline."
+}
+
 install_cliproxy() {
     PLATFORM=$(detect_os)
     
@@ -552,6 +656,20 @@ EOF
     # Add extra alias for cp-db since we installed it in bin folder, to be sure
     echo "alias cp-db=\"$BIN_DIR/cp-db\"" >> "$SHELL_CONFIG"
     setup_shortcuts
+
+    # Ask about optional Claude Statusline
+    echo ""
+    echo -e "${YELLOW}========================================${NC}"
+    echo -e "${YELLOW}   Optional: Claude Statusline${NC}"
+    echo -e "${YELLOW}========================================${NC}"
+    echo "Claude Statusline displays AI model info, costs, git status,"
+    echo "and development environment details in Claude Code."
+    echo ""
+    read -p "Install Claude Statusline? (y/n): " install_statusline
+    
+    if [[ "$install_statusline" =~ ^[Yy]$ ]]; then
+        install_claude_statusline
+    fi
 
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}  INSTALLATION SUCCESS!${NC}"
