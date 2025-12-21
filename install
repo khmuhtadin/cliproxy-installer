@@ -253,6 +253,52 @@ EOF
     echo "    Restart Claude Code to see the statusline."
 }
 
+install_superpowers() {
+    echo -e "${YELLOW}>>> Installing Superpowers for Claude Code...${NC}"
+
+    # Check if claude command exists
+    if ! command -v claude &> /dev/null; then
+        echo -e "${RED}[Error] Claude Code not found. Please install Claude Code first.${NC}"
+        return 1
+    fi
+
+    echo "This will run Claude Code to install the Superpowers plugin."
+    echo ""
+    echo "After Claude Code opens, the installer will automatically run:"
+    echo "  1. /plugin marketplace add obra/superpowers-marketplace"
+    echo "  2. /plugin install superpowers@superpowers-marketplace"
+    echo ""
+
+    # Create a temporary script that Claude will execute
+    SUPERPOWERS_INSTALL_CMD='echo "Installing Superpowers plugin..." && claude -p "/plugin marketplace add obra/superpowers-marketplace" && sleep 2 && claude -p "/plugin install superpowers@superpowers-marketplace"'
+
+    # Run the plugin commands
+    echo "Running: /plugin marketplace add obra/superpowers-marketplace"
+    if claude -p "/plugin marketplace add obra/superpowers-marketplace" 2>/dev/null; then
+        echo -e "${GREEN}[OK] Marketplace added${NC}"
+    else
+        echo -e "${YELLOW}[!] Marketplace may already be added or command failed${NC}"
+    fi
+
+    sleep 1
+
+    echo "Running: /plugin install superpowers@superpowers-marketplace"
+    if claude -p "/plugin install superpowers@superpowers-marketplace" 2>/dev/null; then
+        echo -e "${GREEN}[OK] Superpowers plugin installed${NC}"
+    else
+        echo -e "${YELLOW}[!] Plugin install may have failed. Try manually:${NC}"
+        echo "    claude"
+        echo "    /plugin marketplace add obra/superpowers-marketplace"
+        echo "    /plugin install superpowers@superpowers-marketplace"
+        return 1
+    fi
+
+    echo ""
+    echo -e "${GREEN}[OK] Superpowers installed!${NC}"
+    echo "    Verify with: claude, then type /help"
+    echo "    You should see /superpowers:brainstorm, /superpowers:write-plan, etc."
+}
+
 install_cliproxy() {
     PLATFORM=$(detect_os)
     
@@ -669,6 +715,23 @@ EOF
     
     if [[ "$install_statusline" =~ ^[Yy]$ ]]; then
         install_claude_statusline
+    fi
+
+    # Ask about optional Superpowers
+    echo ""
+    echo -e "${YELLOW}========================================${NC}"
+    echo -e "${YELLOW}   Optional: Superpowers${NC}"
+    echo -e "${YELLOW}========================================${NC}"
+    echo "Superpowers adds advanced workflow skills to Claude Code:"
+    echo "  - Brainstorming & spec refinement"
+    echo "  - Implementation planning"
+    echo "  - Subagent-driven development"
+    echo "  - Test-driven development enforcement"
+    echo ""
+    read -p "Install Superpowers? (y/n): " install_superpowers_choice
+
+    if [[ "$install_superpowers_choice" =~ ^[Yy]$ ]]; then
+        install_superpowers
     fi
 
     echo -e "${GREEN}========================================${NC}"
