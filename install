@@ -687,11 +687,71 @@ EOF
 
 if [[ "$1" == "-update" ]]; then
     echo -e "${CYAN}========================================${NC}"
-    echo -e "${CYAN}   Updating CLIProxy...${NC}"
+    echo -e "${CYAN}   CLIProxy Full Update${NC}"
     echo -e "${CYAN}========================================${NC}"
+    echo ""
+
+    # 1. Update Claude Code (npm or brew)
+    echo -e "${YELLOW}>>> Updating Claude Code...${NC}"
+    CLAUDE_UPDATED=false
+
+    # Check if installed via Homebrew
+    if command -v brew &> /dev/null; then
+        if brew list claude-code &> /dev/null 2>&1 || brew list --cask claude-code &> /dev/null 2>&1; then
+            echo "Detected Claude Code installed via Homebrew"
+            brew upgrade claude-code 2>/dev/null || brew upgrade --cask claude-code 2>/dev/null || echo "Already up to date"
+            echo -e "${GREEN}[OK] Claude Code updated (brew)${NC}"
+            CLAUDE_UPDATED=true
+        fi
+    fi
+
+    # Check if installed via npm (if not already updated via brew)
+    if [ "$CLAUDE_UPDATED" = false ] && command -v npm &> /dev/null; then
+        if npm list -g @anthropic-ai/claude-code &> /dev/null 2>&1; then
+            echo "Detected Claude Code installed via npm"
+            npm update -g @anthropic-ai/claude-code
+            echo -e "${GREEN}[OK] Claude Code updated (npm)${NC}"
+            CLAUDE_UPDATED=true
+        fi
+    fi
+
+    # If not found via either method
+    if [ "$CLAUDE_UPDATED" = false ]; then
+        if command -v claude &> /dev/null; then
+            echo -e "${YELLOW}[!] Claude Code found but install method unknown, please update manually${NC}"
+        else
+            echo -e "${YELLOW}[!] Claude Code not installed, skipping${NC}"
+        fi
+    fi
+    echo ""
+
+    # 2. Update CLIProxy Core
+    echo -e "${YELLOW}>>> Updating CLIProxy Core...${NC}"
     install_dependencies
     install_cliproxy
-    echo -e "${GREEN}Update complete!${NC}"
+    echo ""
+
+    # 3. Update Claude Statusline (if installed)
+    STATUSLINE_DIR="$HOME/Scripts/claude-statusline"
+    if [ -d "$STATUSLINE_DIR" ]; then
+        echo -e "${YELLOW}>>> Updating Claude Statusline...${NC}"
+        if curl -fsSL "https://raw.githubusercontent.com/galpratama/claude-statusline/main/statusline-command.sh" -o "$STATUSLINE_DIR/statusline-command.sh"; then
+            chmod +x "$STATUSLINE_DIR/statusline-command.sh"
+            echo -e "${GREEN}[OK] statusline-command.sh updated${NC}"
+        fi
+        if curl -fsSL "https://raw.githubusercontent.com/galpratama/claude-statusline/main/statusline-config.json" -o "$STATUSLINE_DIR/statusline-config.json"; then
+            echo -e "${GREEN}[OK] statusline-config.json updated${NC}"
+        fi
+        echo ""
+    fi
+
+    echo -e "${GREEN}========================================${NC}"
+    echo -e "${GREEN}   Full Update Complete!${NC}"
+    echo -e "${GREEN}========================================${NC}"
+    echo "Updated components:"
+    echo "  - Claude Code (npm)"
+    echo "  - CLIProxy Core (binary + scripts)"
+    echo "  - Claude Statusline (if installed)"
     exit 0
 fi
 

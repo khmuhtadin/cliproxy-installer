@@ -71,3 +71,4 @@ cp-claude
 ## Credits
 * Installer maintained by [khmuhtadin](https://github.com/khmuhtadin).
 * Core app by [router-for-me/CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus).
+* Claude Statusline by [galpratama/claude-statusline](https://github.com/galpratama/claude-statusline).
