@@ -118,6 +118,11 @@
             background: #e2e8f0;
         }
 
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Stats Bar */
         .stats-bar {
             display: grid;
@@ -164,7 +169,7 @@
 
         .accounts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
         }
 
@@ -317,18 +322,17 @@
         .quota-bar {
             height: 100%;
             border-radius: 4px;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
         }
 
-        .quota-bar.gemini-pro { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .quota-bar.claude { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-        .quota-bar.gemini-flash { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
-        .quota-bar.gemini-image { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+        .quota-bar.high { background: linear-gradient(90deg, #10b981, #34d399); }
+        .quota-bar.medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .quota-bar.low { background: linear-gradient(90deg, #ef4444, #f87171); }
 
         .quota-time {
             font-size: 11px;
             color: #94a3b8;
-            min-width: 40px;
+            min-width: 50px;
             text-align: right;
         }
 
@@ -463,7 +467,7 @@
                 <div class="logo">🔮</div>
                 <div class="title-group">
                     <h1>CLIProxyAPI+ Dashboard</h1>
-                    <div class="subtitle">Account Quota Monitoring</div>
+                    <div class="subtitle">Account Quota Monitoring (Real-time)</div>
                 </div>
             </div>
             <div class="header-right">
@@ -471,7 +475,7 @@
                     <div class="status-dot"></div>
                     <span>Server Running</span>
                 </div>
-                <button class="refresh-btn" onclick="refreshData()">
+                <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
                     🔄 Refresh
                 </button>
             </div>
@@ -492,8 +496,8 @@
                 <div class="stat-value error" id="errorAccounts">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Provider</div>
-                <div class="stat-value" id="providerType">-</div>
+                <div class="stat-label">Last Updated</div>
+                <div class="stat-value" id="lastUpdated" style="font-size: 16px;">-</div>
             </div>
         </div>
 
@@ -506,7 +510,7 @@
         <div class="accounts-grid" id="accountsGrid">
             <div class="loading">
                 <div class="loading-spinner"></div>
-                <span>Loading accounts...</span>
+                <span>Loading accounts and quotas...</span>
             </div>
         </div>
     </div>
@@ -517,8 +521,10 @@
     <script>
         const API_BASE = window.location.origin + '/v0';
         const MANAGEMENT_KEY = 'sk-dummy';
+        const ANTIGRAVITY_API = 'https://daily-cloudcode-pa.sandbox.googleapis.com/v1internal:fetchAvailableModels';
 
         const avatarColors = ['blue', 'purple', 'green', 'orange', 'pink', 'cyan'];
+        let accountsData = [];
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
@@ -528,7 +534,12 @@
         });
 
         async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = '⏳ Loading...';
+
             try {
+                // Step 1: Get all auth files
                 const response = await fetch(`${API_BASE}/management/auth-files`, {
                     headers: {
                         'X-Management-Key': MANAGEMENT_KEY
@@ -542,34 +553,161 @@
                 const data = await response.json();
                 const files = data.files || [];
 
-                // Filter only valid accounts (exclude unknown/static files)
+                // Filter only antigravity accounts
                 const accounts = files.filter(f =>
-                    f.type !== 'unknown' &&
+                    f.type === 'antigravity' &&
                     f.email &&
                     !f.path.includes('/static/')
                 );
 
-                updateStats(accounts);
-                renderAccounts(accounts);
+                // Step 2: Fetch quota for each account
+                const accountsWithQuota = await Promise.all(
+                    accounts.map(async (account) => {
+                        try {
+                            const quota = await fetchAccountQuota(account);
+                            return { ...account, quota };
+                        } catch (error) {
+                            console.error(`Failed to fetch quota for ${account.email}:`, error);
+                            return { ...account, quota: null };
+                        }
+                    })
+                );
+
+                accountsData = accountsWithQuota;
+                updateStats(accountsWithQuota);
+                renderAccounts(accountsWithQuota);
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
 
             } catch (error) {
                 console.error('Error:', error);
                 showToast('Failed to load accounts', 'error');
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '🔄 Refresh';
             }
+        }
+
+        async function fetchAccountQuota(account) {
+            // Read the auth file to get access token
+            const authFileResponse = await fetch(`${API_BASE}/management/auth-files/${account.id}/content`, {
+                headers: {
+                    'X-Management-Key': MANAGEMENT_KEY
+                }
+            });
+
+            let accessToken = null;
+
+            if (authFileResponse.ok) {
+                const authData = await authFileResponse.json();
+                accessToken = authData.access_token;
+            }
+
+            if (!accessToken) {
+                // Try to get from account metadata if available
+                return null;
+            }
+
+            // Fetch quota from Antigravity API
+            const quotaResponse = await fetch(ANTIGRAVITY_API, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'antigravity/1.11.5 windows/amd64'
+                },
+                body: '{}'
+            });
+
+            if (!quotaResponse.ok) {
+                return null;
+            }
+
+            const quotaData = await quotaResponse.json();
+            return parseQuotaData(quotaData.models || {});
+        }
+
+        function parseQuotaData(models) {
+            const result = {
+                geminiPro: { remaining: 0, resetTime: null, count: 0 },
+                claude: { remaining: 0, resetTime: null, count: 0 },
+                geminiFlash: { remaining: 0, resetTime: null, count: 0 },
+                geminiImage: { remaining: 0, resetTime: null, count: 0 }
+            };
+
+            for (const [name, info] of Object.entries(models)) {
+                const quota = info.quotaInfo || {};
+                const remaining = quota.remainingFraction || 0;
+                const resetTime = quota.resetTime || null;
+
+                const nameLower = name.toLowerCase();
+
+                if (nameLower.includes('claude')) {
+                    result.claude.remaining += remaining;
+                    result.claude.count++;
+                    if (resetTime) result.claude.resetTime = resetTime;
+                } else if (nameLower.includes('image')) {
+                    result.geminiImage.remaining += remaining;
+                    result.geminiImage.count++;
+                    if (resetTime) result.geminiImage.resetTime = resetTime;
+                } else if (nameLower.includes('flash')) {
+                    result.geminiFlash.remaining += remaining;
+                    result.geminiFlash.count++;
+                    if (resetTime) result.geminiFlash.resetTime = resetTime;
+                } else if (nameLower.includes('pro') || nameLower.includes('2.5')) {
+                    result.geminiPro.remaining += remaining;
+                    result.geminiPro.count++;
+                    if (resetTime) result.geminiPro.resetTime = resetTime;
+                }
+            }
+
+            // Average out the remaining fractions
+            if (result.geminiPro.count > 0) result.geminiPro.remaining /= result.geminiPro.count;
+            if (result.claude.count > 0) result.claude.remaining /= result.claude.count;
+            if (result.geminiFlash.count > 0) result.geminiFlash.remaining /= result.geminiFlash.count;
+            if (result.geminiImage.count > 0) result.geminiImage.remaining /= result.geminiImage.count;
+
+            return result;
+        }
+
+        function formatResetTime(resetTimeStr) {
+            if (!resetTimeStr) return '';
+
+            try {
+                const resetTime = new Date(resetTimeStr);
+                const now = new Date();
+                const diffMs = resetTime - now;
+
+                if (diffMs < 0) return 'Reset';
+
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+
+                if (diffHours > 0) {
+                    return `${diffHours}h ${diffMins % 60}m`;
+                } else if (diffMins > 0) {
+                    return `${diffMins}m`;
+                } else {
+                    return '<1m';
+                }
+            } catch {
+                return '';
+            }
+        }
+
+        function getQuotaBarClass(remaining) {
+            if (remaining >= 0.5) return 'high';
+            if (remaining >= 0.2) return 'medium';
+            return 'low';
         }
 
         function updateStats(accounts) {
             const total = accounts.length;
             const active = accounts.filter(a => a.status === 'active').length;
             const errors = accounts.filter(a => a.status === 'error').length;
-            const providers = [...new Set(accounts.map(a => a.type))];
 
             document.getElementById('totalAccounts').textContent = total;
             document.getElementById('activeAccounts').textContent = active;
             document.getElementById('errorAccounts').textContent = errors;
-            document.getElementById('providerType').textContent = providers.length > 0
-                ? providers.map(p => capitalize(p)).join(', ')
-                : '-';
         }
 
         function renderAccounts(accounts) {
@@ -592,10 +730,18 @@
                 const colorClass = avatarColors[index % avatarColors.length];
                 const isActive = account.status === 'active';
                 const isError = account.status === 'error';
-                const isPro = account.account_type === 'pro' || account.email.includes('pro');
 
-                // Generate random quota values for demo (since no real API)
-                const quotas = generateQuotaData();
+                const quota = account.quota || {
+                    geminiPro: { remaining: 0 },
+                    claude: { remaining: 0 },
+                    geminiFlash: { remaining: 0 },
+                    geminiImage: { remaining: 0 }
+                };
+
+                const geminiProPercent = Math.round((quota.geminiPro?.remaining || 0) * 100);
+                const claudePercent = Math.round((quota.claude?.remaining || 0) * 100);
+                const geminiFlashPercent = Math.round((quota.geminiFlash?.remaining || 0) * 100);
+                const geminiImagePercent = Math.round((quota.geminiImage?.remaining || 0) * 100);
 
                 return `
                     <div class="account-card ${isError ? 'error' : 'active'}">
@@ -608,7 +754,7 @@
                                     <span>${maskedName}</span>
                                     ${isError
                                         ? '<span class="badge error">Error</span>'
-                                        : isPro
+                                        : account.quota
                                             ? '<span class="badge pro">Pro</span>'
                                             : '<span class="badge free">Free</span>'
                                     }
@@ -622,33 +768,33 @@
                                 <span class="quota-icon">✨</span>
                                 <span class="quota-name">Gemini Pro</span>
                                 <div class="quota-bar-container">
-                                    <div class="quota-bar gemini-pro" style="width: ${quotas.geminiPro}%"></div>
+                                    <div class="quota-bar ${getQuotaBarClass(quota.geminiPro?.remaining || 0)}" style="width: ${geminiProPercent}%"></div>
                                 </div>
-                                ${quotas.geminiProTime ? `<span class="quota-time">${quotas.geminiProTime}</span>` : '<span class="quota-time"></span>'}
+                                <span class="quota-time">${formatResetTime(quota.geminiPro?.resetTime) || `${geminiProPercent}%`}</span>
                             </div>
                             <div class="quota-item">
                                 <span class="quota-icon">🌟</span>
                                 <span class="quota-name">Claude</span>
                                 <div class="quota-bar-container">
-                                    <div class="quota-bar claude" style="width: ${quotas.claude}%"></div>
+                                    <div class="quota-bar ${getQuotaBarClass(quota.claude?.remaining || 0)}" style="width: ${claudePercent}%"></div>
                                 </div>
-                                ${quotas.claudeTime ? `<span class="quota-time">${quotas.claudeTime}</span>` : '<span class="quota-time"></span>'}
+                                <span class="quota-time">${formatResetTime(quota.claude?.resetTime) || `${claudePercent}%`}</span>
                             </div>
                             <div class="quota-item">
                                 <span class="quota-icon">⚡</span>
                                 <span class="quota-name">Gemini Flash</span>
                                 <div class="quota-bar-container">
-                                    <div class="quota-bar gemini-flash" style="width: ${quotas.geminiFlash}%"></div>
+                                    <div class="quota-bar ${getQuotaBarClass(quota.geminiFlash?.remaining || 0)}" style="width: ${geminiFlashPercent}%"></div>
                                 </div>
-                                <span class="quota-time"></span>
+                                <span class="quota-time">${formatResetTime(quota.geminiFlash?.resetTime) || `${geminiFlashPercent}%`}</span>
                             </div>
                             <div class="quota-item">
                                 <span class="quota-icon">🎨</span>
                                 <span class="quota-name">Gemini Image</span>
                                 <div class="quota-bar-container">
-                                    <div class="quota-bar gemini-image" style="width: ${quotas.geminiImage}%"></div>
+                                    <div class="quota-bar ${getQuotaBarClass(quota.geminiImage?.remaining || 0)}" style="width: ${geminiImagePercent}%"></div>
                                 </div>
-                                <span class="quota-time"></span>
+                                <span class="quota-time">${formatResetTime(quota.geminiImage?.resetTime) || `${geminiImagePercent}%`}</span>
                             </div>
                         </div>
 
@@ -663,19 +809,6 @@
                     </div>
                 `;
             }).join('');
-        }
-
-        function generateQuotaData() {
-            // Generate random quota percentages for demo
-            // In production, this would come from actual API
-            return {
-                geminiPro: Math.floor(Math.random() * 100),
-                geminiProTime: Math.random() > 0.5 ? `${Math.floor(Math.random() * 5) + 1}h` : null,
-                claude: Math.floor(Math.random() * 100),
-                claudeTime: Math.random() > 0.5 ? `${Math.floor(Math.random() * 59) + 1} min` : null,
-                geminiFlash: Math.floor(Math.random() * 100),
-                geminiImage: Math.floor(Math.random() * 100)
-            };
         }
 
         function getInitial(email) {
@@ -695,10 +828,6 @@
             const [name, domain] = email.split('@');
             const maskedName = name.charAt(0) + '***' + (name.length > 1 ? name.charAt(name.length - 1) : '');
             return `${maskedName}@${domain}`;
-        }
-
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
         async function useAccount(accountId) {
