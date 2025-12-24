@@ -521,10 +521,14 @@
     <script>
         const API_BASE = window.location.origin + '/v0';
         const MANAGEMENT_KEY = 'sk-dummy';
-        const ANTIGRAVITY_API = 'https://daily-cloudcode-pa.sandbox.googleapis.com/v1internal:fetchAvailableModels';
+
+        // QUOTA_CACHE_START
+        const EMBEDDED_QUOTA_CACHE = null;
+        // QUOTA_CACHE_END
 
         const avatarColors = ['blue', 'purple', 'green', 'orange', 'pink', 'cyan'];
         let accountsData = [];
+        let quotaCache = EMBEDDED_QUOTA_CACHE || { accounts: {} };
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
@@ -539,7 +543,16 @@
             refreshBtn.textContent = '⏳ Loading...';
 
             try {
-                // Step 1: Get all auth files
+                // Step 1: Use embedded quota cache (updated by quota-fetcher.py)
+                if (EMBEDDED_QUOTA_CACHE) {
+                    quotaCache = EMBEDDED_QUOTA_CACHE;
+                    console.log('Using embedded quota cache:', Object.keys(quotaCache.accounts || {}).length, 'accounts');
+                } else {
+                    console.log('No embedded quota cache - run: python3 ~/.cli-proxy-api/scripts/quota-fetcher.py');
+                    quotaCache = { accounts: {} };
+                }
+
+                // Step 2: Get all auth files
                 const response = await fetch(`${API_BASE}/management/auth-files`, {
                     headers: {
                         'X-Management-Key': MANAGEMENT_KEY
@@ -560,23 +573,24 @@
                     !f.path.includes('/static/')
                 );
 
-                // Step 2: Fetch quota for each account
-                const accountsWithQuota = await Promise.all(
-                    accounts.map(async (account) => {
-                        try {
-                            const quota = await fetchAccountQuota(account);
-                            return { ...account, quota };
-                        } catch (error) {
-                            console.error(`Failed to fetch quota for ${account.email}:`, error);
-                            return { ...account, quota: null };
-                        }
-                    })
-                );
+                // Step 3: Merge quota data from cache
+                const accountsWithQuota = accounts.map(account => {
+                    const cachedData = quotaCache.accounts?.[account.id];
+                    return {
+                        ...account,
+                        quota: cachedData?.quota || null,
+                        quotaFetchedAt: cachedData?.fetchedAt || null
+                    };
+                });
 
                 accountsData = accountsWithQuota;
                 updateStats(accountsWithQuota);
                 renderAccounts(accountsWithQuota);
-                document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+
+                const lastUpdate = quotaCache.lastUpdated
+                    ? new Date(quotaCache.lastUpdated).toLocaleTimeString()
+                    : new Date().toLocaleTimeString();
+                document.getElementById('lastUpdated').textContent = lastUpdate;
 
             } catch (error) {
                 console.error('Error:', error);
@@ -588,42 +602,9 @@
         }
 
         async function fetchAccountQuota(account) {
-            // Read the auth file to get access token
-            const authFileResponse = await fetch(`${API_BASE}/management/auth-files/${account.id}/content`, {
-                headers: {
-                    'X-Management-Key': MANAGEMENT_KEY
-                }
-            });
-
-            let accessToken = null;
-
-            if (authFileResponse.ok) {
-                const authData = await authFileResponse.json();
-                accessToken = authData.access_token;
-            }
-
-            if (!accessToken) {
-                // Try to get from account metadata if available
-                return null;
-            }
-
-            // Fetch quota from Antigravity API
-            const quotaResponse = await fetch(ANTIGRAVITY_API, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'antigravity/1.11.5 windows/amd64'
-                },
-                body: '{}'
-            });
-
-            if (!quotaResponse.ok) {
-                return null;
-            }
-
-            const quotaData = await quotaResponse.json();
-            return parseQuotaData(quotaData.models || {});
+            // Quota is now loaded from cache file (quota-cache.json)
+            // The quota-fetcher.py script updates the cache periodically
+            return null;
         }
 
         function parseQuotaData(models) {
@@ -731,17 +712,38 @@
                 const isActive = account.status === 'active';
                 const isError = account.status === 'error';
 
-                const quota = account.quota || {
-                    geminiPro: { remaining: 0 },
-                    claude: { remaining: 0 },
-                    geminiFlash: { remaining: 0 },
-                    geminiImage: { remaining: 0 }
-                };
+                const quota = account.quota;
+                const hasQuota = quota !== null;
 
-                const geminiProPercent = Math.round((quota.geminiPro?.remaining || 0) * 100);
-                const claudePercent = Math.round((quota.claude?.remaining || 0) * 100);
-                const geminiFlashPercent = Math.round((quota.geminiFlash?.remaining || 0) * 100);
-                const geminiImagePercent = Math.round((quota.geminiImage?.remaining || 0) * 100);
+                const geminiProPercent = hasQuota ? Math.round((quota.geminiPro?.remaining || 0) * 100) : null;
+                const claudePercent = hasQuota ? Math.round((quota.claude?.remaining || 0) * 100) : null;
+                const geminiFlashPercent = hasQuota ? Math.round((quota.geminiFlash?.remaining || 0) * 100) : null;
+                const geminiImagePercent = hasQuota ? Math.round((quota.geminiImage?.remaining || 0) * 100) : null;
+
+                const renderQuotaBar = (icon, name, percent, resetTime) => {
+                    if (percent === null) {
+                        return `
+                            <div class="quota-item">
+                                <span class="quota-icon">${icon}</span>
+                                <span class="quota-name">${name}</span>
+                                <div class="quota-bar-container" style="background: #f1f5f9;">
+                                    <div class="quota-bar" style="width: 100%; background: linear-gradient(90deg, #cbd5e1, #e2e8f0);"></div>
+                                </div>
+                                <span class="quota-time" style="color: #94a3b8;">N/A</span>
+                            </div>
+                        `;
+                    }
+                    return `
+                        <div class="quota-item">
+                            <span class="quota-icon">${icon}</span>
+                            <span class="quota-name">${name}</span>
+                            <div class="quota-bar-container">
+                                <div class="quota-bar ${getQuotaBarClass(percent/100)}" style="width: ${percent}%"></div>
+                            </div>
+                            <span class="quota-time">${resetTime || `${percent}%`}</span>
+                        </div>
+                    `;
+                };
 
                 return `
                     <div class="account-card ${isError ? 'error' : 'active'}">
@@ -754,9 +756,7 @@
                                     <span>${maskedName}</span>
                                     ${isError
                                         ? '<span class="badge error">Error</span>'
-                                        : account.quota
-                                            ? '<span class="badge pro">Pro</span>'
-                                            : '<span class="badge free">Free</span>'
+                                        : '<span class="badge pro">Active</span>'
                                     }
                                 </div>
                                 <div class="account-email">${maskedEmail}</div>
@@ -764,38 +764,14 @@
                         </div>
 
                         <div class="quota-list">
-                            <div class="quota-item">
-                                <span class="quota-icon">✨</span>
-                                <span class="quota-name">Gemini Pro</span>
-                                <div class="quota-bar-container">
-                                    <div class="quota-bar ${getQuotaBarClass(quota.geminiPro?.remaining || 0)}" style="width: ${geminiProPercent}%"></div>
-                                </div>
-                                <span class="quota-time">${formatResetTime(quota.geminiPro?.resetTime) || `${geminiProPercent}%`}</span>
-                            </div>
-                            <div class="quota-item">
-                                <span class="quota-icon">🌟</span>
-                                <span class="quota-name">Claude</span>
-                                <div class="quota-bar-container">
-                                    <div class="quota-bar ${getQuotaBarClass(quota.claude?.remaining || 0)}" style="width: ${claudePercent}%"></div>
-                                </div>
-                                <span class="quota-time">${formatResetTime(quota.claude?.resetTime) || `${claudePercent}%`}</span>
-                            </div>
-                            <div class="quota-item">
-                                <span class="quota-icon">⚡</span>
-                                <span class="quota-name">Gemini Flash</span>
-                                <div class="quota-bar-container">
-                                    <div class="quota-bar ${getQuotaBarClass(quota.geminiFlash?.remaining || 0)}" style="width: ${geminiFlashPercent}%"></div>
-                                </div>
-                                <span class="quota-time">${formatResetTime(quota.geminiFlash?.resetTime) || `${geminiFlashPercent}%`}</span>
-                            </div>
-                            <div class="quota-item">
-                                <span class="quota-icon">🎨</span>
-                                <span class="quota-name">Gemini Image</span>
-                                <div class="quota-bar-container">
-                                    <div class="quota-bar ${getQuotaBarClass(quota.geminiImage?.remaining || 0)}" style="width: ${geminiImagePercent}%"></div>
-                                </div>
-                                <span class="quota-time">${formatResetTime(quota.geminiImage?.resetTime) || `${geminiImagePercent}%`}</span>
-                            </div>
+                            ${renderQuotaBar('✨', 'Gemini Pro', geminiProPercent, hasQuota ? formatResetTime(quota.geminiPro?.resetTime) : null)}
+                            ${renderQuotaBar('🌟', 'Claude', claudePercent, hasQuota ? formatResetTime(quota.claude?.resetTime) : null)}
+                            ${renderQuotaBar('⚡', 'Gemini Flash', geminiFlashPercent, hasQuota ? formatResetTime(quota.geminiFlash?.resetTime) : null)}
+                            ${renderQuotaBar('🎨', 'Gemini Image', geminiImagePercent, hasQuota ? formatResetTime(quota.geminiImage?.resetTime) : null)}
+                        </div>
+
+                        <div class="quota-note" style="font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 12px;">
+                            ${hasQuota ? '' : 'Run: python3 ~/.cli-proxy-api/scripts/quota-fetcher.py'}
                         </div>
 
                         <div class="card-actions">
