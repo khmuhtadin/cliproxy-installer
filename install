@@ -328,6 +328,7 @@ install_superpowers() {
 }
 
 install_cliproxy() {
+    SKIP_OPTIONAL="${1:-false}"
     PLATFORM=$(detect_os)
     
     if ! command -v go &> /dev/null; then
@@ -758,35 +759,38 @@ EOF
 
     setup_shortcuts
 
-    # Ask about optional Claude Statusline
-    echo ""
-    echo -e "${YELLOW}========================================${NC}"
-    echo -e "${YELLOW}   Optional: Claude Statusline${NC}"
-    echo -e "${YELLOW}========================================${NC}"
-    echo "Claude Statusline displays AI model info, costs, git status,"
-    echo "and development environment details in Claude Code."
-    echo ""
-    read -p "Install Claude Statusline? (y/n): " install_statusline
-    
-    if [[ "$install_statusline" =~ ^[Yy]$ ]]; then
-        install_claude_statusline
-    fi
+    # Skip optional installs if in update mode
+    if [ "$SKIP_OPTIONAL" != "true" ]; then
+        # Ask about optional Claude Statusline
+        echo ""
+        echo -e "${YELLOW}========================================${NC}"
+        echo -e "${YELLOW}   Optional: Claude Statusline${NC}"
+        echo -e "${YELLOW}========================================${NC}"
+        echo "Claude Statusline displays AI model info, costs, git status,"
+        echo "and development environment details in Claude Code."
+        echo ""
+        read -p "Install Claude Statusline? (y/n): " install_statusline
 
-    # Ask about optional Superpowers
-    echo ""
-    echo -e "${YELLOW}========================================${NC}"
-    echo -e "${YELLOW}   Optional: Superpowers${NC}"
-    echo -e "${YELLOW}========================================${NC}"
-    echo "Superpowers adds advanced workflow skills to Claude Code:"
-    echo "  - Brainstorming & spec refinement"
-    echo "  - Implementation planning"
-    echo "  - Subagent-driven development"
-    echo "  - Test-driven development enforcement"
-    echo ""
-    read -p "Install Superpowers? (y/n): " install_superpowers_choice
+        if [[ "$install_statusline" =~ ^[Yy]$ ]]; then
+            install_claude_statusline
+        fi
 
-    if [[ "$install_superpowers_choice" =~ ^[Yy]$ ]]; then
-        install_superpowers
+        # Ask about optional Superpowers
+        echo ""
+        echo -e "${YELLOW}========================================${NC}"
+        echo -e "${YELLOW}   Optional: Superpowers${NC}"
+        echo -e "${YELLOW}========================================${NC}"
+        echo "Superpowers adds advanced workflow skills to Claude Code:"
+        echo "  - Brainstorming & spec refinement"
+        echo "  - Implementation planning"
+        echo "  - Subagent-driven development"
+        echo "  - Test-driven development enforcement"
+        echo ""
+        read -p "Install Superpowers? (y/n): " install_superpowers_choice
+
+        if [[ "$install_superpowers_choice" =~ ^[Yy]$ ]]; then
+            install_superpowers
+        fi
     fi
 
     echo -e "${GREEN}========================================${NC}"
@@ -892,7 +896,7 @@ if [[ "$1" == "-update" ]]; then
     # 2. Update CLIProxy Core
     echo -e "${YELLOW}>>> Updating CLIProxy Core...${NC}"
     install_dependencies
-    install_cliproxy
+    install_cliproxy "true"  # Skip optional prompts in update mode
     echo ""
 
     # 3. Update Claude Statusline (if installed)
