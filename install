@@ -854,14 +854,19 @@ if [[ "$1" == "-update" ]]; then
         echo ""
     fi
 
-    # 4. Update Dashboard
+    # 4. Update Dashboard and Scripts
     echo -e "${YELLOW}>>> Updating Dashboard...${NC}"
     STATIC_DIR="$HOME/.cli-proxy-api/static"
-    mkdir -p "$STATIC_DIR"
+    SCRIPTS_DIR="$HOME/.cli-proxy-api/scripts"
+    mkdir -p "$STATIC_DIR" "$SCRIPTS_DIR"
     if curl -fsSL "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/static/dashboard.html" -o "$STATIC_DIR/dashboard.html" 2>/dev/null; then
         echo -e "${GREEN}[OK] Dashboard updated${NC}"
     else
         echo -e "${YELLOW}[!] Could not update dashboard${NC}"
+    fi
+    if curl -fsSL "https://raw.githubusercontent.com/khmuhtadin/cliproxy-installer/main/assets/scripts/quota-fetcher.py" -o "$SCRIPTS_DIR/quota-fetcher.py" 2>/dev/null; then
+        chmod +x "$SCRIPTS_DIR/quota-fetcher.py"
+        echo -e "${GREEN}[OK] Quota fetcher script updated${NC}"
     fi
     echo ""
 
