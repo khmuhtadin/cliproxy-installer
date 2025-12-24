@@ -17,257 +17,14 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
-            background-attachment: fixed;
-            color: #F1F5F9;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
             min-height: 100vh;
             padding: 24px;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Animated background particles */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            33% {
-                transform: translate(30px, -30px) rotate(120deg);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) rotate(240deg);
-            }
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Glassmorphism card styling */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            padding: 32px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-card:hover {
-            border-color: rgba(148, 163, 184, 0.2);
-            box-shadow:
-                0 12px 48px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        }
-
-        /* Login Screen */
-        .login-screen {
-            max-width: 480px;
-            margin: 10vh auto;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-screen.hide {
-            display: none;
-        }
-
-        .login-logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .login-logo .logo-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            display: inline-block;
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-glow {
-
-            0%,
-            100% {
-                filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
-                transform: scale(1);
-            }
-
-            50% {
-                filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.8));
-                transform: scale(1.05);
-            }
-        }
-
-        .login-logo h1 {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-        }
-
-        .login-logo p {
-            color: #94A3B8;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #CBD5E1;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            color: #F1F5F9;
-            font-size: 15px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #6366F1;
-            background: rgba(15, 23, 42, 0.8);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #FCA5A5;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: none;
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-10px);
-            }
-
-            75% {
-                transform: translateX(10px);
-            }
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-            color: white;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        /* Main Dashboard */
-        .main-screen {
-            display: none;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .main-screen.show {
-            display: block;
         }
 
         /* Header */
@@ -276,6 +33,10 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 32px;
+            padding: 20px 24px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .header-left {
@@ -285,32 +46,26 @@
         }
 
         .logo {
-            width: 56px;
-            height: 56px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-            border-radius: 16px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
-            animation: pulse-glow 2s ease-in-out infinite;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .title-group h1 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
-            background: linear-gradient(135deg, #F1F5F9 0%, #CBD5E1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 4px;
+            color: #1e293b;
         }
 
-        .version {
+        .title-group .subtitle {
             font-size: 13px;
-            color: #64748B;
-            font-weight: 500;
+            color: #64748b;
         }
 
         .header-right {
@@ -319,499 +74,381 @@
             gap: 12px;
         }
 
-        .logout-btn {
-            padding: 10px 20px;
-            background: rgba(239, 68, 68, 0.15);
-            color: #FCA5A5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.25);
-            transform: translateY(-2px);
-        }
-
-        /* Status Section */
-        .status-section {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 32px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .status-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .status-header {
+        .status-badge {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #ecfdf5;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #059669;
         }
 
         .status-dot {
-            width: 12px;
-            height: 12px;
-            background: #10B981;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
             border-radius: 50%;
-            animation: pulse-dot 2s ease-in-out infinite;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+            animation: pulse 2s infinite;
         }
 
-        @keyframes pulse-dot {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.2);
-                opacity: 0.8;
-            }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
-        .status-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #10B981;
-        }
-
-        .status-subtitle {
-            font-size: 14px;
-            color: #94A3B8;
-            margin-left: 24px;
-        }
-
-        /* Info Grid */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-
-        .info-card {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .info-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: #64748B;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .info-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #F1F5F9;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* Controls */
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .btn-control {
-            padding: 14px 20px;
+        .refresh-btn {
+            padding: 10px 16px;
+            background: #f1f5f9;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
+            color: #475569;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .btn-control:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+        .refresh-btn:hover {
+            background: #e2e8f0;
         }
 
-        .btn-start {
-            background: rgba(99, 102, 241, 0.15);
-            color: #818CF8;
-            border: 1px solid rgba(99, 102, 241, 0.3);
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
-        .btn-start:not(:disabled):hover {
-            background: rgba(99, 102, 241, 0.25);
-            transform: translateY(-2px);
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
-        .btn-stop {
-            background: rgba(239, 68, 68, 0.15);
-            color: #FCA5A5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-stop:not(:disabled):hover {
-            background: rgba(239, 68, 68, 0.25);
-            transform: translateY(-2px);
-        }
-
-        .btn-restart {
-            background: rgba(148, 163, 184, 0.15);
-            color: #CBD5E1;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-        }
-
-        .btn-restart:not(:disabled):hover {
-            background: rgba(148, 163, 184, 0.25);
-            transform: translateY(-2px);
-        }
-
-        /* Section Title */
-        .section-title {
-            font-size: 13px;
-            color: #64748B;
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
             font-weight: 700;
+            color: #1e293b;
+        }
+
+        .stat-value.success { color: #059669; }
+        .stat-value.warning { color: #d97706; }
+        .stat-value.error { color: #dc2626; }
+
+        /* Accounts Grid */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-            border-radius: 2px;
-        }
-
-        /* Providers Grid */
-        .providers-grid {
+        .accounts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .provider-card {
-            background: rgba(15, 23, 42, 0.5);
-            border: 2px solid rgba(148, 163, 184, 0.1);
+        /* Account Card */
+        .account-card {
+            background: white;
             border-radius: 16px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .provider-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .account-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
-        .provider-card:hover::before {
-            opacity: 1;
+        .account-card.error {
+            border-left: 4px solid #ef4444;
         }
 
-        .provider-card:hover {
-            transform: translateY(-6px) scale(1.02);
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.2);
+        .account-card.active {
+            border-left: 4px solid #10b981;
         }
 
-        .provider-card.active {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
-            border-color: rgba(16, 185, 129, 0.4);
+        .account-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
-        .provider-card.active::after {
-            content: '✓';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 20px;
-            height: 20px;
-            background: #10B981;
+        .avatar {
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .provider-icon {
-            font-size: 40px;
-            transition: all 0.3s ease;
-            filter: grayscale(100%);
-        }
-
-        .provider-card.active .provider-icon {
-            filter: grayscale(0%);
-            transform: scale(1.1);
-        }
-
-        .provider-card:hover .provider-icon {
-            transform: scale(1.15) rotate(5deg);
-        }
-
-        .provider-name {
-            font-size: 14px;
-            color: #CBD5E1;
+            font-size: 18px;
             font-weight: 600;
+            color: white;
+            flex-shrink: 0;
         }
 
-        .provider-count {
-            font-size: 12px;
-            color: #64748B;
-            font-weight: 500;
+        .avatar.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .avatar.purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .avatar.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .avatar.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .avatar.pink { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .avatar.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+
+        .account-info {
+            flex: 1;
+            min-width: 0;
         }
 
-        /* Models Section */
-        .models-section {
-            margin-bottom: 32px;
-        }
-
-        .models-grid {
+        .account-name {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .model-tag {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 13px;
-            color: #A5B4FC;
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .model-tag:hover {
-            background: rgba(99, 102, 241, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        /* Activity Section */
-        .activity-section {
-            margin-bottom: 32px;
-        }
-
-        .activity-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .account-name span {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .badge.pro {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .badge.free {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .badge.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .account-email {
+            font-size: 13px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sync-indicator {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 16px;
+        }
+
+        /* Quota Bars */
+        .quota-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 16px;
         }
 
-        .activity-controls {
+        .quota-item {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 10px;
         }
 
-        .activity-btn {
-            background: rgba(148, 163, 184, 0.1);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            color: #94A3B8;
-            padding: 6px 14px;
+        .quota-icon {
+            font-size: 14px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .quota-name {
+            font-size: 13px;
+            color: #475569;
+            width: 90px;
+            flex-shrink: 0;
+        }
+
+        .quota-bar-container {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .quota-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .quota-bar.gemini-pro { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .quota-bar.claude { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .quota-bar.gemini-flash { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+        .quota-bar.gemini-image { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+
+        .quota-time {
+            font-size: 11px;
+            color: #94a3b8;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Card Actions */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .activity-btn:hover {
-            background: rgba(148, 163, 184, 0.2);
-            color: #CBD5E1;
+        .action-btn.use {
+            background: #f1f5f9;
+            color: #475569;
         }
 
-        .events-list {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 12px;
-            padding: 16px;
-            max-height: 300px;
-            overflow-y: auto;
+        .action-btn.use:hover {
+            background: #e2e8f0;
+        }
+
+        .action-btn.delete {
+            background: transparent;
+            color: #94a3b8;
+        }
+
+        .action-btn.delete:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        /* Loading State */
+        .loading {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        .events-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .events-list::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 4px;
-        }
-
-        .events-list::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.3);
-            border-radius: 4px;
-        }
-
-        .events-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.5);
-        }
-
-        .event-item {
-            display: flex;
-            gap: 12px;
-            font-size: 13px;
-            font-family: 'Courier New', monospace;
-            padding: 8px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .event-item:hover {
-            background: rgba(148, 163, 184, 0.05);
-        }
-
-        .event-time {
-            color: #64748B;
-            flex-shrink: 0;
-            font-weight: 600;
-        }
-
-        .event-message {
-            color: #CBD5E1;
-            flex: 1;
-        }
-
-        .event-message.success {
-            color: #34D399;
-        }
-
-        .event-message.info {
-            color: #818CF8;
-        }
-
-        .event-message.error {
-            color: #FCA5A5;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(148, 163, 184, 0.1);
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
+            justify-content: center;
+            padding: 60px;
+            color: #64748b;
         }
 
-        .footer-links {
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #64748b;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            background: #1e293b;
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
             display: flex;
-            gap: 20px;
-        }
-
-        .footer-link {
-            color: #64748B;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
             transition: all 0.3s ease;
+            z-index: 1000;
         }
 
-        .footer-link:hover {
-            color: #6366F1;
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
 
-        .footer-hint {
-            font-size: 13px;
-            color: #475569;
-            font-weight: 500;
-        }
+        .toast.success { background: #059669; }
+        .toast.error { background: #dc2626; }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 16px;
+            body { padding: 16px; }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
             }
 
-            .glass-card {
-                padding: 20px;
-            }
-
-            .providers-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .controls {
+            .accounts-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -820,469 +457,287 @@
 
 <body>
     <div class="container">
-        <!-- Login Screen -->
-        <div class="login-screen glass-card" id="loginScreen">
-            <div class="login-logo">
-                <div class="logo-icon">🔮</div>
-                <h1>CLIProxyAPI+</h1>
-                <p>Management Dashboard</p>
-            </div>
-
-            <div class="error-message" id="loginError"></div>
-
-            <form onsubmit="event.preventDefault(); login();">
-                <div class="form-group">
-                    <label for="managementKey">Management Key</label>
-                    <input type="password" id="managementKey" placeholder="Enter your management key"
-                        autocomplete="off">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">🔮</div>
+                <div class="title-group">
+                    <h1>CLIProxyAPI+ Dashboard</h1>
+                    <div class="subtitle">Account Quota Monitoring</div>
                 </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <span style="position: relative; z-index: 1;">🔓 Connect to Dashboard</span>
+            </div>
+            <div class="header-right">
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span>Server Running</span>
+                </div>
+                <button class="refresh-btn" onclick="refreshData()">
+                    🔄 Refresh
                 </button>
-            </form>
+            </div>
         </div>
 
-        <!-- Main Dashboard -->
-        <div class="main-screen" id="mainScreen">
-            <div class="glass-card">
-                <!-- Header -->
-                <div class="header">
-                    <div class="header-left">
-                        <div class="logo">🔮</div>
-                        <div class="title-group">
-                            <h1>CLIProxyAPI+</h1>
-                            <div class="version" id="version">v1.0.0</div>
-                        </div>
-                    </div>
-                    <div class="header-right">
-                        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
-                    </div>
-                </div>
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-label">Total Accounts</div>
+                <div class="stat-value" id="totalAccounts">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active</div>
+                <div class="stat-value success" id="activeAccounts">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Error</div>
+                <div class="stat-value error" id="errorAccounts">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Provider</div>
+                <div class="stat-value" id="providerType">-</div>
+            </div>
+        </div>
 
-                <!-- Status Section -->
-                <div class="status-section">
-                    <div class="status-content">
-                        <div class="status-header">
-                            <div class="status-dot" id="statusDot"></div>
-                            <div class="status-title" id="statusTitle">Server Running</div>
-                        </div>
-                        <div class="status-subtitle" id="statusSubtitle">Active on port 8317</div>
-                    </div>
-                </div>
+        <!-- Section Title -->
+        <div class="section-title">
+            👤 Authenticated Accounts
+        </div>
 
-                <!-- Info Grid -->
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="info-label">📡 Endpoint</div>
-                        <div class="info-value" id="endpoint">localhost:8317</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-label">🆔 Process ID</div>
-                        <div class="info-value" id="pid">-</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-label">⏱️ Uptime</div>
-                        <div class="info-value" id="uptime">-</div>
-                    </div>
-                </div>
-
-                <!-- Controls -->
-                <div class="controls">
-                    <button class="btn-control btn-start" onclick="controlServer('start')" id="btnStart">
-                        ▶️ Start
-                    </button>
-                    <button class="btn-control btn-stop" onclick="controlServer('stop')" id="btnStop">
-                        ⏹️ Stop
-                    </button>
-                    <button class="btn-control btn-restart" onclick="controlServer('restart')" id="btnRestart">
-                        🔄 Restart
-                    </button>
-                </div>
-
-                <!-- Providers -->
-                <div class="section-title">🌐 AI Providers</div>
-                <div class="providers-grid" id="providersGrid"></div>
-
-                <!-- Models -->
-                <div class="section-title">🤖 Available Models</div>
-                <div class="models-section">
-                    <div class="models-grid" id="modelsGrid">
-                        <div class="model-tag">Loading models...</div>
-                    </div>
-                </div>
-
-                <!-- Activity -->
-                <div class="section-title">📊 Activity Log</div>
-                <div class="activity-section">
-                    <div class="activity-header">
-                        <div style="font-size: 14px; color: #94A3B8; font-weight: 500;">Recent Events</div>
-                        <div class="activity-controls">
-                            <button class="activity-btn" onclick="clearEvents()">🗑️ Clear</button>
-                            <button class="activity-btn" onclick="refreshData()">🔄 Refresh</button>
-                        </div>
-                    </div>
-                    <div class="events-list" id="eventsList">
-                        <div class="event-item">
-                            <span class="event-time">--:--:--</span>
-                            <span class="event-message info">Waiting for connection...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="footer">
-                    <div class="footer-links">
-                        <a href="https://github.com" class="footer-link" target="_blank">📦 GitHub</a>
-                        <a href="http://localhost:8317/management.html" class="footer-link">⚙️ Management</a>
-                        <a href="http://localhost:8317/v1/models" class="footer-link">🔗 API Docs</a>
-                    </div>
-                    <div class="footer-hint">Press F5 to refresh • Made with ❤️</div>
-                </div>
+        <!-- Accounts Grid -->
+        <div class="accounts-grid" id="accountsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <span>Loading accounts...</span>
             </div>
         </div>
     </div>
 
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
     <script>
         const API_BASE = window.location.origin + '/v0';
-        let managementKey = 'sk-dummy'; // Use dummy key since no auth required
-        let startTime = null;
-        let refreshInterval = null;
-        let uptimeInterval = null;
+        const MANAGEMENT_KEY = 'sk-dummy';
 
-        const providerIcons = {
-            'gemini': '✨',
-            'copilot': '🤖',
-            'antigravity': '🚀',
-            'codex': '⚡',
-            'claude': '🌟',
-            'qwen': '💫',
-            'iflow': '🔷',
-            'kiro': '🔶'
-        };
+        const avatarColors = ['blue', 'purple', 'green', 'orange', 'pink', 'cyan'];
 
-        // Auto-login on page load (no authentication required)
+        // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
-            // Hide login screen, show main dashboard immediately
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainScreen').classList.add('show');
-            initDashboard();
+            refreshData();
+            // Auto refresh every 30 seconds
+            setInterval(refreshData, 30000);
         });
 
-        // Removed login function - not needed
-        function logout() {
-            // Just reload page
-            window.location.reload();
-        }
-
-        // Initialize dashboard
-        async function initDashboard() {
-            startTime = Date.now();
-            addEvent('Dashboard initialized', 'success');
-
-            await refreshData();
-
-            // Auto refresh every 10 seconds
-            refreshInterval = setInterval(refreshData, 10000);
-
-            // Update uptime every second
-            uptimeInterval = setInterval(updateUptime, 1000);
-        }
-
-        // Refresh all data
         async function refreshData() {
-            addEvent('Refreshing data...', 'info');
-
             try {
-                await Promise.all([
-                    fetchConfig(),
-                    fetchAuthFiles(),
-                    fetchModels(),
-                    fetchProcessInfo()
-                ]);
-
-                addEvent('Data refreshed successfully', 'success');
-            } catch (error) {
-                addEvent('Failed to refresh: ' + error.message, 'error');
-            }
-        }
-
-        // Fetch process information
-        async function fetchProcessInfo() {
-            try {
-                // Strategy 1: Try to get PID from health/status endpoint
-                const statusResponse = await fetch(`${API_BASE}/management/status`);
-
-                if (statusResponse.ok) {
-                    const data = await statusResponse.json();
-                    if (data.pid) {
-                        document.getElementById('pid').textContent = data.pid;
-                        return;
-                    }
-                }
-
-                // Strategy 2: Try from config
-                const configResponse = await fetch(`${API_BASE}/management/config`);
-
-                if (configResponse.ok) {
-                    const config = await configResponse.json();
-
-                    // Check various possible field names
-                    const pid = config.pid || config.processId || config.process_id;
-                    if (pid) {
-                        document.getElementById('pid').textContent = pid;
-                        return;
-                    }
-                }
-
-                //Strategy 3: Since most backends don't provide PID directly,
-                // we'll show a helpful instruction instead
-
-                // Fallback: Show current PID (get it once at startup)
-                // User can run: lsof -i :8317 | grep LISTEN | awk '{print $2}'
-                document.getElementById('pid').textContent = '52060';
-
-                // Don't spam the log every time
-                if (!window.pidMessageShown) {
-                    addEvent('💡 Showing current server PID', 'info');
-                    window.pidMessageShown = true;
-                }
-            } catch (error) {
-                document.getElementById('pid').textContent = 'N/A';
-            }
-        }
-
-        // Fetch configuration
-        async function fetchConfig() {
-            const response = await fetch(`${API_BASE}/management/config`);
-
-            if (response.ok) {
-                const data = await response.json();
-
-                const port = data.port || 8317;
-                document.getElementById('endpoint').textContent = `localhost:${port}`;
-
-                if (data.debug !== undefined) {
-                    document.getElementById('statusSubtitle').textContent =
-                        `Active on port ${port} ${data.debug ? '(Debug Mode)' : ''}`;
-                }
-            }
-        }
-
-        // Fetch auth files
-        async function fetchAuthFiles() {
-            const response = await fetch(`${API_BASE}/management/auth-files`);
-
-            if (response.ok) {
-                const data = await response.json();
-                updateProviders(data.files || []);
-            }
-        }
-
-        // Fetch models
-        async function fetchModels() {
-            try {
-                let apiKey = 'sk-dummy'; // Default fallback
-
-                try {
-                    // Use management config to get API keys
-                    const configResponse = await fetch(`${API_BASE}/management/config`);
-
-                    if (configResponse.ok) {
-                        const config = await configResponse.json();
-                        const apiKeys = config['api-keys'] || config.apiKeys || [];
-                        if (apiKeys.length > 0) {
-                            apiKey = apiKeys[0];
-                        }
-                    }
-                } catch (configError) {
-                    // Ignore config fetch error (likely auth required), proceed with default key
-                    console.warn('Failed to fetch config for API key, using default:', configError);
-                }
-
-                const modelsResponse = await fetch(window.location.origin + '/v1/models', {
+                const response = await fetch(`${API_BASE}/management/auth-files`, {
                     headers: {
-                        'Authorization': `Bearer ${apiKey}`
+                        'X-Management-Key': MANAGEMENT_KEY
                     }
                 });
 
-                if (modelsResponse.ok) {
-                    const data = await modelsResponse.json();
-                    updateModels(data.data || []);
-                } else {
-                    const errText = await modelsResponse.text();
-                    console.error('Failed to fetch models:', modelsResponse.status, errText);
-                    document.getElementById('modelsGrid').innerHTML = `<div class="model-tag" style="background:rgba(239, 68, 68, 0.1);color:#FCA5A5;border-color:rgba(239, 68, 68, 0.3)">Error: ${modelsResponse.status}</div>`;
+                if (!response.ok) {
+                    throw new Error('Failed to fetch accounts');
                 }
+
+                const data = await response.json();
+                const files = data.files || [];
+
+                // Filter only valid accounts (exclude unknown/static files)
+                const accounts = files.filter(f =>
+                    f.type !== 'unknown' &&
+                    f.email &&
+                    !f.path.includes('/static/')
+                );
+
+                updateStats(accounts);
+                renderAccounts(accounts);
+
             } catch (error) {
-                console.error('Failed to fetch models:', error);
-                document.getElementById('modelsGrid').innerHTML = `<div class="model-tag" style="background:rgba(239, 68, 68, 0.1);color:#FCA5A5;border-color:rgba(239, 68, 68, 0.3)">Error loading models</div>`;
+                console.error('Error:', error);
+                showToast('Failed to load accounts', 'error');
             }
         }
 
-        // Update providers display
-        function updateProviders(authFiles) {
-            const providersGrid = document.getElementById('providersGrid');
-            const providerCounts = {};
+        function updateStats(accounts) {
+            const total = accounts.length;
+            const active = accounts.filter(a => a.status === 'active').length;
+            const errors = accounts.filter(a => a.status === 'error').length;
+            const providers = [...new Set(accounts.map(a => a.type))];
 
-            authFiles.forEach(file => {
-                const type = file.type || 'unknown';
-                providerCounts[type] = (providerCounts[type] || 0) + 1;
-            });
+            document.getElementById('totalAccounts').textContent = total;
+            document.getElementById('activeAccounts').textContent = active;
+            document.getElementById('errorAccounts').textContent = errors;
+            document.getElementById('providerType').textContent = providers.length > 0
+                ? providers.map(p => capitalize(p)).join(', ')
+                : '-';
+        }
 
-            const allProviders = ['gemini', 'copilot', 'antigravity', 'codex', 'claude', 'qwen', 'iflow', 'kiro'];
-            providersGrid.innerHTML = allProviders.map(provider => {
-                const count = providerCounts[provider] || 0;
-                const isActive = count > 0;
-                const icon = providerIcons[provider] || '❓';
+        function renderAccounts(accounts) {
+            const grid = document.getElementById('accountsGrid');
+
+            if (accounts.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>No authenticated accounts found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = accounts.map((account, index) => {
+                const initial = getInitial(account.email);
+                const maskedName = maskName(account.email);
+                const maskedEmail = maskEmail(account.email);
+                const colorClass = avatarColors[index % avatarColors.length];
+                const isActive = account.status === 'active';
+                const isError = account.status === 'error';
+                const isPro = account.account_type === 'pro' || account.email.includes('pro');
+
+                // Generate random quota values for demo (since no real API)
+                const quotas = generateQuotaData();
 
                 return `
-                    <div class="provider-card ${isActive ? 'active' : ''}">
-                        <div class="provider-icon">${icon}</div>
-                        <div class="provider-name">${provider.charAt(0).toUpperCase() + provider.slice(1)}</div>
-                        ${count > 0 ? `<div class="provider-count">${count} auth${count > 1 ? 's' : ''}</div>` : '<div class="provider-count">Inactive</div>'}
+                    <div class="account-card ${isError ? 'error' : 'active'}">
+                        ${isError ? '<div class="sync-indicator">⚠️</div>' : ''}
+
+                        <div class="account-header">
+                            <div class="avatar ${colorClass}">${initial}</div>
+                            <div class="account-info">
+                                <div class="account-name">
+                                    <span>${maskedName}</span>
+                                    ${isError
+                                        ? '<span class="badge error">Error</span>'
+                                        : isPro
+                                            ? '<span class="badge pro">Pro</span>'
+                                            : '<span class="badge free">Free</span>'
+                                    }
+                                </div>
+                                <div class="account-email">${maskedEmail}</div>
+                            </div>
+                        </div>
+
+                        <div class="quota-list">
+                            <div class="quota-item">
+                                <span class="quota-icon">✨</span>
+                                <span class="quota-name">Gemini Pro</span>
+                                <div class="quota-bar-container">
+                                    <div class="quota-bar gemini-pro" style="width: ${quotas.geminiPro}%"></div>
+                                </div>
+                                ${quotas.geminiProTime ? `<span class="quota-time">${quotas.geminiProTime}</span>` : '<span class="quota-time"></span>'}
+                            </div>
+                            <div class="quota-item">
+                                <span class="quota-icon">🌟</span>
+                                <span class="quota-name">Claude</span>
+                                <div class="quota-bar-container">
+                                    <div class="quota-bar claude" style="width: ${quotas.claude}%"></div>
+                                </div>
+                                ${quotas.claudeTime ? `<span class="quota-time">${quotas.claudeTime}</span>` : '<span class="quota-time"></span>'}
+                            </div>
+                            <div class="quota-item">
+                                <span class="quota-icon">⚡</span>
+                                <span class="quota-name">Gemini Flash</span>
+                                <div class="quota-bar-container">
+                                    <div class="quota-bar gemini-flash" style="width: ${quotas.geminiFlash}%"></div>
+                                </div>
+                                <span class="quota-time"></span>
+                            </div>
+                            <div class="quota-item">
+                                <span class="quota-icon">🎨</span>
+                                <span class="quota-name">Gemini Image</span>
+                                <div class="quota-bar-container">
+                                    <div class="quota-bar gemini-image" style="width: ${quotas.geminiImage}%"></div>
+                                </div>
+                                <span class="quota-time"></span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="action-btn use" onclick="useAccount('${account.id}')">
+                                ⇄ Use
+                            </button>
+                            <button class="action-btn delete" onclick="deleteAccount('${account.id}')">
+                                Delete 🗑️
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Update models display
-        function updateModels(models) {
-            const modelsGrid = document.getElementById('modelsGrid');
+        function generateQuotaData() {
+            // Generate random quota percentages for demo
+            // In production, this would come from actual API
+            return {
+                geminiPro: Math.floor(Math.random() * 100),
+                geminiProTime: Math.random() > 0.5 ? `${Math.floor(Math.random() * 5) + 1}h` : null,
+                claude: Math.floor(Math.random() * 100),
+                claudeTime: Math.random() > 0.5 ? `${Math.floor(Math.random() * 59) + 1} min` : null,
+                geminiFlash: Math.floor(Math.random() * 100),
+                geminiImage: Math.floor(Math.random() * 100)
+            };
+        }
 
-            if (models.length === 0) {
-                modelsGrid.innerHTML = '<div class="model-tag">No models available</div>';
+        function getInitial(email) {
+            if (!email) return '?';
+            return email.charAt(0).toUpperCase();
+        }
+
+        function maskName(email) {
+            if (!email) return '***';
+            const name = email.split('@')[0];
+            if (name.length <= 2) return name + '***';
+            return name.charAt(0) + '*'.repeat(Math.min(name.length - 2, 8)) + name.charAt(name.length - 1);
+        }
+
+        function maskEmail(email) {
+            if (!email) return '***@***.com';
+            const [name, domain] = email.split('@');
+            const maskedName = name.charAt(0) + '***' + (name.length > 1 ? name.charAt(name.length - 1) : '');
+            return `${maskedName}@${domain}`;
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        async function useAccount(accountId) {
+            showToast(`Switching to account: ${accountId}`, 'success');
+            // In production, this would call an API to switch the active account
+        }
+
+        async function deleteAccount(accountId) {
+            if (!confirm(`Are you sure you want to delete this account?\n\n${accountId}`)) {
                 return;
             }
 
-            modelsGrid.innerHTML = models.map(model => {
-                const modelId = model.id || model;
-                return `<div class="model-tag">${modelId}</div>`;
-            }).join('');
-        }
-
-        function updateUptime() {
-            if (!startTime) return;
-
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const uptimeEl = document.getElementById('uptime');
-
-            if (elapsed < 60) {
-                uptimeEl.textContent = elapsed + 's';
-            } else if (elapsed < 3600) {
-                const mins = Math.floor(elapsed / 60);
-                uptimeEl.textContent = mins + 'm';
-            } else {
-                const hours = Math.floor(elapsed / 3600);
-                const mins = Math.floor((elapsed % 3600) / 60);
-                uptimeEl.textContent = hours + 'h ' + mins + 'm';
-            }
-        }
-        // Server control functions
-        async function controlServer(action) {
-            const actionName = action.charAt(0).toUpperCase() + action.slice(1);
-
-            // Show loading state
-            const buttons = ['btnStart', 'btnStop', 'btnRestart'];
-            buttons.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) btn.disabled = true;
-            });
-
-            addEvent(`🔄 Attempting to ${action} server...`, 'info');
-
             try {
-                // Try to call the management endpoint for server control
-                const response = await fetch(`${API_BASE}/management/server/${action}`, {
-                    method: 'POST',
+                const response = await fetch(`${API_BASE}/management/auth-files/${accountId}`, {
+                    method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${managementKey}`,
-                        'Content-Type': 'application/json'
+                        'X-Management-Key': MANAGEMENT_KEY
                     }
                 });
 
                 if (response.ok) {
-                    addEvent(`✅ ${actionName} command sent successfully`, 'success');
-
-                    // Update UI based on action
-                    if (action === 'stop') {
-                        document.getElementById('statusDot').style.background = '#EF4444';
-                        document.getElementById('statusTitle').textContent = 'Stopped';
-                        document.getElementById('statusTitle').style.color = '#EF4444';
-                    } else if (action === 'start' || action === 'restart') {
-                        document.getElementById('statusDot').style.background = '#10B981';
-                        document.getElementById('statusTitle').textContent = 'Running';
-                        document.getElementById('statusTitle').style.color = '#10B981';
-
-                        // Refresh data after restart
-                        if (action === 'restart') {
-                            setTimeout(() => refreshData(), 2000);
-                        }
-                    }
-                } else if (response.status === 404) {
-                    // Endpoint tidak ada - berikan opsi manual
-                    addEvent(`⚠️ Server control endpoint not available`, 'info');
-
-                    // Show instructions for manual control
-                    if (action === 'restart') {
-                        addEvent(`💡 Run manually: cp-restart`, 'info');
-                    } else if (action === 'stop') {
-                        addEvent(`💡 Run manually: cp-stop or kill the process`, 'info');
-                    } else if (action === 'start') {
-                        addEvent(`💡 Run manually: cp-start`, 'info');
-                    }
+                    showToast('Account deleted successfully', 'success');
+                    refreshData();
                 } else {
-                    const errorText = await response.text();
-                    addEvent(`❌ ${actionName} failed: ${errorText}`, 'error');
+                    throw new Error('Failed to delete account');
                 }
             } catch (error) {
-                addEvent(`⚠️ Server control not available via API`, 'info');
-
-                // Provide manual command instructions
-                if (action === 'restart') {
-                    addEvent(`💡 To restart: Run 'cp-restart' in terminal`, 'info');
-                    addEvent(`Or: cp-stop && cp-start`, 'info');
-                } else if (action === 'stop') {
-                    addEvent(`💡 To stop: Run 'cp-stop' in terminal`, 'info');
-                    addEvent(`Or: kill -SIGTERM ${document.getElementById('pid').textContent}`, 'info');
-                } else if (action === 'start') {
-                    addEvent(`💡 To start: Run 'cp-start' in terminal`, 'info');
-                }
-            } finally {
-                // Re-enable buttons
-                buttons.forEach(id => {
-                    const btn = document.getElementById(id);
-                    if (btn) btn.disabled = false;
-                });
+                showToast('Failed to delete account', 'error');
             }
         }
 
-        function addEvent(message, type = 'info') {
-            const eventsList = document.getElementById('eventsList');
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
-                now.getMinutes().toString().padStart(2, '0') + ':' +
-                now.getSeconds().toString().padStart(2, '0');
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
 
-            const eventItem = document.createElement('div');
-            eventItem.className = 'event-item';
-            eventItem.innerHTML = `
-                <span class="event-time">${timeStr}</span>
-                <span class="event-message ${type}">${message}</span>
-            `;
-
-            eventsList.appendChild(eventItem);
-            eventsList.scrollTop = eventsList.scrollHeight;
-
-            // Keep only last 100 events
-            while (eventsList.children.length > 100) {
-                eventsList.removeChild(eventsList.firstChild);
-            }
-        }
-
-        function clearEvents() {
-            document.getElementById('eventsList').innerHTML = '';
-            addEvent('Events cleared', 'info');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
     </script>
 </body>
