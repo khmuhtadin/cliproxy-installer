@@ -337,85 +337,70 @@ configure_opencode() {
 
     mkdir -p "$OPENCODE_CONFIG_DIR"
 
-    # Create OpenCode configuration with CLIProxy custom provider
-    cat > "$OPENCODE_CONFIG" <<'OPENCODEEOF'
+    # Only create config if it doesn't exist (preserve user's existing config)
+    if [ ! -f "$OPENCODE_CONFIG" ]; then
+        echo "Creating default OpenCode configuration..."
+        # Create OpenCode configuration with CLIProxy custom provider
+        # Format: provider.<name>.options.baseURL and provider.<name>.options.apiKey
+        cat > "$OPENCODE_CONFIG" <<'OPENCODEEOF'
 {
   "provider": {
     "cliproxy": {
       "name": "CLIProxy",
-      "type": "openai",
-      "baseURL": "http://localhost:8317/v1",
-      "envKey": "CLIPROXY_API_KEY",
+      "id": "cliproxy",
+      "env": [],
+      "options": {
+        "baseURL": "http://localhost:8317/v1",
+        "apiKey": "sk-dummy"
+      },
       "models": {
         "gemini-claude-opus-4-5-thinking": {
-          "name": "Claude Opus 4.5 Thinking [Antigravity]",
+          "name": "Claude Opus 4.5 Thinking",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 200000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
+          "maxOutput": 16384
         },
         "gemini-claude-sonnet-4-5": {
-          "name": "Claude Sonnet 4.5 [Antigravity]",
+          "name": "Claude Sonnet 4.5",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 200000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
+          "maxOutput": 16384
         },
         "gemini-claude-sonnet-4-5-thinking": {
-          "name": "Claude Sonnet 4.5 Thinking [Antigravity]",
+          "name": "Claude Sonnet 4.5 Thinking",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 200000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
+          "maxOutput": 16384
         },
         "gemini-3-pro-preview": {
-          "name": "Gemini 3 Pro [Antigravity]",
+          "name": "Gemini 3 Pro",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 1000000,
-          "maxOutputTokens": 65536,
-          "supportsStreaming": true
+          "maxOutput": 65536
         },
         "gemini-2.5-pro": {
-          "name": "Gemini 2.5 Pro [Gemini]",
+          "name": "Gemini 2.5 Pro",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 1000000,
-          "maxOutputTokens": 65536,
-          "supportsStreaming": true
-        },
-        "claude-opus-4.5": {
-          "name": "Claude Opus 4.5 [Copilot]",
-          "contextWindow": 200000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
-        },
-        "gpt-5-mini": {
-          "name": "GPT-5 Mini [Copilot]",
-          "contextWindow": 128000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
+          "maxOutput": 65536
         }
       }
     }
   },
-  "model": {
-    "big": "cliproxy:gemini-claude-opus-4-5-thinking",
-    "small": "cliproxy:gemini-claude-sonnet-4-5"
-  }
+  "model": "cliproxy/gemini-claude-opus-4-5-thinking",
+  "small_model": "cliproxy/gemini-claude-sonnet-4-5"
 }
 OPENCODEEOF
-
-    # Set the API key environment variable
-    SHELL_CONFIG="$HOME/.zshrc"
-    if [ "$SHELL" == "/bin/bash" ]; then
-        SHELL_CONFIG="$HOME/.bashrc"
+        echo -e "${GREEN}[OK] OpenCode configured at $OPENCODE_CONFIG${NC}"
+    else
+        echo -e "${YELLOW}[!] OpenCode config exists, preserving user settings${NC}"
+        echo "    Location: $OPENCODE_CONFIG"
     fi
-
-    # Add CLIPROXY_API_KEY if not exists
-    if ! grep -q "CLIPROXY_API_KEY" "$SHELL_CONFIG" 2>/dev/null; then
-        echo "" >> "$SHELL_CONFIG"
-        echo "# CLIProxy API Key for OpenCode" >> "$SHELL_CONFIG"
-        echo "export CLIPROXY_API_KEY=\"sk-dummy\"" >> "$SHELL_CONFIG"
-    fi
-
-    echo -e "${GREEN}[OK] OpenCode configured at $OPENCODE_CONFIG${NC}"
-    echo "    Models configured:"
-    echo "      - Big: gemini-claude-opus-4-5-thinking (via CLIProxy)"
-    echo "      - Small: gemini-claude-sonnet-4-5 (via CLIProxy)"
 }
 
 install_superpowers() {
@@ -843,9 +828,6 @@ PORT=8317
 OPENCODE_CONFIG_DIR="$HOME/.config/opencode"
 OPENCODE_CONFIG="$OPENCODE_CONFIG_DIR/opencode.json"
 
-# Export API key for CLIProxy custom provider
-export CLIPROXY_API_KEY="sk-dummy"
-
 # Function to check if server is running
 check_server() {
     lsof -i :$PORT -sTCP:LISTEN -t >/dev/null 2>&1
@@ -894,35 +876,39 @@ if [ ! -f "$OPENCODE_CONFIG" ]; then
   "provider": {
     "cliproxy": {
       "name": "CLIProxy",
-      "type": "openai",
-      "baseURL": "http://localhost:8317/v1",
-      "envKey": "CLIPROXY_API_KEY",
+      "id": "cliproxy",
+      "env": [],
+      "options": {
+        "baseURL": "http://localhost:8317/v1",
+        "apiKey": "sk-dummy"
+      },
       "models": {
         "gemini-claude-opus-4-5-thinking": {
-          "name": "Claude Opus 4.5 Thinking [Antigravity]",
+          "name": "Claude Opus 4.5 Thinking",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 200000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
+          "maxOutput": 16384
         },
         "gemini-claude-sonnet-4-5": {
-          "name": "Claude Sonnet 4.5 [Antigravity]",
+          "name": "Claude Sonnet 4.5",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 200000,
-          "maxOutputTokens": 16384,
-          "supportsStreaming": true
+          "maxOutput": 16384
         },
         "gemini-3-pro-preview": {
-          "name": "Gemini 3 Pro [Antigravity]",
+          "name": "Gemini 3 Pro",
+          "inputPrice": 0,
+          "outputPrice": 0,
           "contextWindow": 1000000,
-          "maxOutputTokens": 65536,
-          "supportsStreaming": true
+          "maxOutput": 65536
         }
       }
     }
   },
-  "model": {
-    "big": "cliproxy:gemini-claude-opus-4-5-thinking",
-    "small": "cliproxy:gemini-claude-sonnet-4-5"
-  }
+  "model": "cliproxy/gemini-claude-opus-4-5-thinking",
+  "small_model": "cliproxy/gemini-claude-sonnet-4-5"
 }
 CONFIGEOF
     echo "OpenCode config created at $OPENCODE_CONFIG"
